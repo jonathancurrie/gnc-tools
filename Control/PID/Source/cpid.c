@@ -155,7 +155,11 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     {
         retCode += CPID_FAILURE;
     }
-    if (Tf <= ((real_t)0.5 * Ts)) // ensures stability
+    if (Tf < (real_t)0.0)
+    {
+        retCode += CPID_FAILURE;
+    }
+    if ((Tf > (real_t)0.0) && (Tf <= ((real_t)0.5 * Ts))) // ensures stability
     {
         retCode += CPID_FAILURE;
     }
