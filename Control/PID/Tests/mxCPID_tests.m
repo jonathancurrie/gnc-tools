@@ -121,7 +121,7 @@ classdef mxCPID_tests < matlab.unittest.TestCase
             tFinal = 10;
             testParams1 = testCase.makeTestControllerParams(1.5, 1, 1.2, 0.1, 0, 0.9, 0.8, -2, 2);
             testParams2 = testCase.makeTestControllerParams(2.5, 1.2, 1.5, 0.15, 0, 0.7, 0.3, -0.5, 0.5);
-            testParams3 = testCase.makeTestControllerParams(0.5, 0.6, 0.5, 0.01, 0, 0.6, 0.0, 0.1, 0.2);
+            testParams3 = testCase.makeTestControllerParams(0.5, 0.6, 0.5, 0.01, 0, 0.6, 0.0, 0.0, 0.2);
             
             testCase.verifyEqual(0, testCase.testController(Gs, testParams1, tFinal), 'AbsTol', testCase.absTol);
             testCase.verifyEqual(0, testCase.testController(Gs, testParams2, tFinal), 'AbsTol', testCase.absTol);
@@ -169,7 +169,7 @@ classdef mxCPID_tests < matlab.unittest.TestCase
             tFinal = 10;
             testParams1 = testCase.makeTestControllerParams(1.5, 1, 1.2, 0.1, 0.2, 0.9, 0.8, -2, 2);
             testParams2 = testCase.makeTestControllerParams(2.5, 1.2, 1.5, 0.15, 0.3, 0.7, 0.4, -0.4, 0.5);
-            testParams3 = testCase.makeTestControllerParams(0.5, 0.6, 0.5, 0.01, 0.05, 0.6, 0.0, 0.1, 0.3);
+            testParams3 = testCase.makeTestControllerParams(0.5, 0.6, 0.5, 0.01, 0.05, 0.6, 0.0, 0.0, 0.3);
             
             testCase.verifyEqual(0, testCase.testController(Gs, testParams1, tFinal), 'AbsTol', testCase.absTol);
             testCase.verifyEqual(0, testCase.testController(Gs, testParams2, tFinal), 'AbsTol', testCase.absTol);

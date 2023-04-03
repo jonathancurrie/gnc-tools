@@ -85,14 +85,14 @@ int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u)
     // Saturate as required
     real_t backClamp = (real_t)0.0;
     if (*u > pid->uMax)
-    {
-        *u = pid->uMax;
+    {        
         backClamp = pid->uMax - *u;        
+        *u = pid->uMax;
     }
     else if (*u < pid->uMin)
-    {
-        *u = pid->uMin;
+    {        
         backClamp = pid->uMin - *u;
+        *u = pid->uMin;
     }
 
     // Update filters/integrators
