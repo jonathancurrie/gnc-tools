@@ -18,7 +18,7 @@
 #ifndef CPID_H
 #define CPID_H
 
-#include <stdint.h>     // For int8_t, etc
+#include <stdint.h>     // For uint8_t, etc
 
 // Type Definitions for Target System (user to modify as required)
 typedef double real_t;  //!< Floating point real number
@@ -66,7 +66,7 @@ typedef struct
  * @param c             Setpoint weight on derivative term (error = c*r - y), default 1, >= 0
  * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
  */
-uint8_t cpidInit(cpidData* pid, real_t kp, real_t ki, real_t kd, real_t tf, real_t ts, real_t umin, real_t umax, real_t b=1.0, real_t c=1.0);
+uint8_t cpidInit(cpidData* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c);
 
 
 /**
