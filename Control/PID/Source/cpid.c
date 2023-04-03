@@ -16,13 +16,13 @@
 // Local Function Declarations
 //
 real_t forwardEuler(real_t y, real_t yprev, real_t ts);
-uint8_t isValidReal(real_t num);
+int8_t isValidReal(real_t num);
 
 
 //
 // PID Controller Update
 //
-uint8_t cpidUpdate(cpidData* pid, real_t r, real_t y, real_t* u)
+int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u)
 {
     // Input pointer checks
     if (pid == NULL)
@@ -120,7 +120,7 @@ real_t forwardEuler(real_t y, real_t yprev, real_t ts)
 //
 // PID Controller Data Structure Initialization
 //
-uint8_t cpidInit(cpidData* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c)
+int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c)
 {
     // Assert we can sum the failure code (compile time check)
     static_assert(CPID_FAILURE != 0, "Require CPID_FAILURE to be != 0");
@@ -151,30 +151,30 @@ uint8_t cpidInit(cpidData* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real
     }
 
     // Check valid numerical values for a PID controller
-    if (pid->Ts <= (real_t)0.0)
+    if (Ts <= (real_t)0.0)
     {
         retCode += CPID_FAILURE;
     }
-    if (pid->Tf <= ((real_t)0.5 * pid->Ts)) // ensures stability
+    if (Tf <= ((real_t)0.5 * Ts)) // ensures stability
     {
         retCode += CPID_FAILURE;
     }
-    if (pid->c < (real_t)0.0)
+    if (c < (real_t)0.0)
     {
         retCode += CPID_FAILURE;
     }
-    if (pid->b < (real_t)0.0)
+    if (b < (real_t)0.0)
     {
         retCode += CPID_FAILURE;
     }
     // Check saturation bounds are sensible
-    if ((isinf(pid->uMin) == 0) && (isinf(pid->uMax) == 0))
+    if ((isinf(uMin) == 0) && (isinf(uMax) == 0))
     {
-        if (pid->uMin > pid->uMax)
+        if (uMin > uMax)
         {
             retCode += CPID_FAILURE;
         }
-        if (pid->uMin == pid->uMax)
+        if (uMin == uMax)
         {
             retCode += CPID_FAILURE;
         }
@@ -213,7 +213,7 @@ uint8_t cpidInit(cpidData* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real
 //
 // PID Controller Reset
 //
-uint8_t cpidReset(cpidData* pid)
+int8_t cpidReset(cpidData_t* pid)
 {
     // Input pointer check
     if (pid == NULL)
@@ -232,7 +232,7 @@ uint8_t cpidReset(cpidData* pid)
 // Valid real number check
 // Checks not NaN, Inf
 //
-uint8_t isValidReal(real_t num)
+int8_t isValidReal(real_t num)
 {
     if (isinf(num))
     {
