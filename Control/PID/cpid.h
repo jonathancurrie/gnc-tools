@@ -2,7 +2,7 @@
  * @file cpid.h
  * @author Jonathan Currie (controlengineering.co.nz)
  * @date 03-Apr-2023
- * @brief 2 Degree of Freedom (2DOF) Proportional-Integral-Derivative (PID) 
+ * @brief Discrete 2 Degree of Freedom (2DOF) Proportional-Integral-Derivative (PID) 
  *        Controller with Derivative Filter and Anti-Wind Up.
  * 
  * Control Law:
@@ -20,12 +20,12 @@
 
 #include <stdint.h>     // For int8_t, etc
 
-/**
- * @brief Type Definitions for Target System (user to modify as required)
- * 
- */
-typedef double real_t;  // Floating point real number
+// Type Definitions for Target System (user to modify as required)
+typedef double real_t;  //!< Floating point real number
 
+// Constant Definitions
+#define CPID_SUCCESS 0  //!< Success return code
+#define CPID_FAILURE -1 //!< Failure return code (may be summed)
 
 /**
  * @brief Contains PID tuning and internal calculation variables
@@ -33,16 +33,16 @@ typedef double real_t;  // Floating point real number
  */
 typedef struct  
 {
-	real_t kp;			//!< Proportional Gain 
-	real_t ki;			//!< Integral Gain 
-	real_t kd;			//!< Derivative Gain 
-	real_t tf;			//!< Derivative filter time constant
+	real_t Kp;			//!< Proportional Gain 
+	real_t Ki;			//!< Integral Gain 
+	real_t Kd;			//!< Derivative Gain 
+	real_t Tf;			//!< Derivative filter time constant
+	real_t Ts;			//!< Sample interval [s] 
+	real_t uMin;		//!< Minimum control move
+    real_t uMax;		//!< Maximum control move
     real_t b;           //!< Setpoint weight on proportional term
     real_t c;           //!< Setpoint weight on derivative term
-	real_t ts;			//!< Sample interval [s] 
-	real_t umax;		//!< Maximum control move
-	real_t umin;		//!< Minimum control move
-	real_t invts;       //!< Internal precalculated 1.0/Ts
+	real_t invTs;       //!< Internal precalculated 1.0/Ts
 	real_t xI;		    //!< Internal integral state
 	real_t xD;		    //!< Internal derivative filter state		
 	uint8_t useI;		//!< Internal integral control flag
@@ -55,29 +55,39 @@ typedef struct
  * @brief               Initialize a PID controller data structure
  * 
  * @param pid           A pointer to a C PID data structure to initialize
- * @param kp            Proportional gain 
- * @param ki            Integral gain (0 to disable)
- * @param kd            Derivative gain (0 to disable)
- * @param tf            Derivative filter time constant (0 to disable, larger adds more filtering)
- * @param ts            Sampling interval (nominally seconds)
- * @param umin          Minimum control move (controller output)
- * @param umax          Maximum control move (controller output)
- * @param b             Setpoint weight on proportional term (error = b*r - y), default 1
- * @param c             Setpoint weight on derivative term (error = c*r - y), default 1
- * @return uint8_t      Return code (0 success, -ve failure)
+ * @param Kp            Proportional gain 
+ * @param Ki            Integral gain (0 to disable)
+ * @param Kd            Derivative gain (0 to disable)
+ * @param Tf            Derivative filter time constant (0 to disable, larger adds more filtering)
+ * @param Ts            Sampling interval (nominally seconds)
+ * @param uMin          Minimum control move (controller output, set to -Inf if not required)
+ * @param uMax          Maximum control move (controller output, set to +Inf if not required)
+ * @param b             Setpoint weight on proportional term (error = b*r - y), default 1, >= 0
+ * @param c             Setpoint weight on derivative term (error = c*r - y), default 1, >= 0
+ * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
  */
 uint8_t cpidInit(cpidData* pid, real_t kp, real_t ki, real_t kd, real_t tf, real_t ts, real_t umin, real_t umax, real_t b=1.0, real_t c=1.0);
 
 
 /**
  * @brief               PID controller update
+ *                      Must be called at a rate of 1/ts (sampling frequency)
  * 
  * @param pid           A pointer to an initialized C PID data structure
  * @param r             The current setpoint
  * @param y             The current plant output
  * @param u             A pointer to the computed control move (controller output)
- * @return uint8_t      Return code (0 success, -ve failure)
+ * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
  */
 uint8_t cpidUpdate(cpidData* pid, real_t r, real_t y, real_t* u);
+
+
+/**
+ * @brief               PID controller reset
+ * 
+ * @param pid           A pointer to an initialized C PID data structure
+ * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
+ */
+uint8_t cpidReset(cpidData* pid);
 
 #endif /* CPID_H */
