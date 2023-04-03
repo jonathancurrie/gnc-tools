@@ -12,39 +12,49 @@ run(mxCPID_tests())
 
 %% Test against Simulink
 clc
+clear
+
+% Tuning
 params = [];
 params.Kp = 2;
 params.Ki = 1.2;
 params.Kd = 1;
 params.Ts = 0.1;
-params.Tf = 0.3;
+params.Tf = 0.1;
 params.c  = 0.1; % D
 params.b  = 1; % K
-params.umin = -1.5;
-params.umax = +1.5;
+params.uMin = -1.5;
+params.uMax = +1.5;
 
-mxCPID('load',params)
+% Initialize C PID
+mxCPID('init',params);
       
-
+% Test System
 Gs = tf(1.2, [0.5 0.3 0.2]);
 Gz = c2d(Gs, params.Ts); % used in Simulink
 tFinal = 10;
 
+% Simulink Setup
 t = (0:params.Ts:tFinal)';
-r = ones(size(t)); r(1:2) = 0;
+r = 1.5*ones(size(t)); %r(1:10) = 0;
 simin.time = t;  % used in Simulink
 simin.signals.values = r;
 
-% sim('pidSim');
-sim('pidSimFilter');
+% Sim in Simulink
+if (params.Tf > 0)
+    sim('pidSimFilter', [0 tFinal], simset('SrcWorkspace','current'));
+else
+    sim('pidSim', [0 tFinal], simset('SrcWorkspace','current'));
+end
 
-% Sim C++ Version, using simulink y output (only interested in u)
+% Sim C Version, using simulink y output (only interested in u)
 uj = zeros(size(r));
 yj = zeros(size(r));
 for i = 1:length(yj)
     uj(i) = mxCPID('update',r(i), sim_y(i));
 end
 
+% Plot Comparison
 clf
 subplot(311)
 plot(t, sim_u, t, uj);
@@ -64,8 +74,15 @@ grid on; ylabel('Closed Loop Output [y]');
 xlabel('Time');
 
 
+%%
+clf
+[y, t, x] = lsim(Gz, sim_u, t);
+plot(t,y,t,sim_y)
+
+
 %% Test against MATLAB
 clc
+clf
 params = [];
 params.Kp = 3.5;
 params.Ki = 2;
@@ -89,7 +106,7 @@ Gs = tf(1.2, [0.5 0.3 0.2]);
 Gz = c2d(Gs, params.Ts);
 Gz.InputName = 'u';
 Gz.OutputName = 'y';
-step(Gz)
+% step(Gz)
 
 clModel = connect(Gz,mlPID,'r','y','u');
 
