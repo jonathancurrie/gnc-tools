@@ -71,7 +71,7 @@ class Utils
         static std::string toLower(const std::string& strIn) noexcept;
 };
 
-};
+}
 
 
 #endif /* MEXHELPERS_H */

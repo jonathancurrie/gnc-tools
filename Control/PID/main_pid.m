@@ -1,14 +1,14 @@
-%% C PID Compilation and Testing
+%% PID Compilation and Testing
 % J.Currie April 2023
 clc
-clear mxCPID
+clear mxPID
 
-mex -v Control/PID/Source/mxCPID.cpp Control/PID/Source/cpid.c Common/Source/mexHelpers.cpp -I.
-movefile('mxCPID.mexw64','Control/PID','f')
+mex -v Control/PID/Source/mxPID.cpp Control/PID/Source/pid.cpp Control/PID/Source/cpid.c Common/Source/mexHelpers.cpp -I.
+movefile('mxPID.mexw64','Control/PID','f')
 
 %% Unit Tests
 clc
-run(mxCPID_tests())
+run(mxPID_tests())
 
 %% Test against Simulink
 clc
@@ -26,8 +26,8 @@ params.b  = 1; % K
 params.uMin = -1.5;
 params.uMax = +1.5;
 
-% Initialize C PID
-mxCPID('init',params);
+% Initialize PID
+mxPID('init',params);
       
 % Test System
 Gs = tf(1.2, [0.5 0.3 0.2]);
@@ -51,7 +51,7 @@ end
 uj = zeros(size(r));
 yj = zeros(size(r));
 for i = 1:length(yj)
-    uj(i) = mxCPID('update',r(i), sim_y(i));
+    uj(i) = mxPID('update',r(i), sim_y(i));
 end
 
 % Plot Comparison
@@ -87,7 +87,7 @@ params.b  = 1;
 params.uMin = -inf; % note ML pid2 doesn't support limits, only SL
 params.uMax = +inf;
 
-mxCPID('Init',params)
+mxPID('Init',params)
       
 mlPID = pid2(params.Kp, params.Ki, params.Kd, params.Tf, params.b, params.c, params.Ts, ...
              'IFormula', 'ForwardEuler', 'DFormula', 'ForwardEuler');
@@ -110,7 +110,7 @@ r = ones(size(t)); r(1:2) = 0;
 uj = zeros(size(r));
 yj = zeros(size(r));
 for i = 1:length(yj)
-    uj(i) = mxCPID('update',r(i), y(i));
+    uj(i) = mxPID('update',r(i), y(i));
 end
 
 um = lsim(mlPID, [r y], t);

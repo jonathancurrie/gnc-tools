@@ -24,12 +24,18 @@ namespace GNCTools
 
     mxArray* MEX::createUInt8(uint8_t val) noexcept
     {
-        return mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+        mxArray* ptr = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+        uint8_t* dataPtr = static_cast<uint8_t*>(mxGetData(ptr));
+        *dataPtr = val;
+        return ptr;
     }
 
     mxArray* MEX::createInt8(int8_t val) noexcept
     {
-        return mxCreateNumericMatrix(1, 1, mxINT8_CLASS, mxREAL);
+        mxArray* ptr = mxCreateNumericMatrix(1, 1, mxINT8_CLASS, mxREAL);
+        int8_t* dataPtr = static_cast<int8_t*>(mxGetData(ptr));
+        *dataPtr = val;
+        return ptr;
     }
 
 
