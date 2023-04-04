@@ -73,13 +73,6 @@ hold off;
 grid on; ylabel('Closed Loop Output [y]');
 xlabel('Time');
 
-
-%%
-clf
-[y, t, x] = lsim(Gz, sim_u, t);
-plot(t,y,t,sim_y)
-
-
 %% Test against MATLAB
 clc
 clf
