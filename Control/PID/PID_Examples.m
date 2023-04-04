@@ -2,6 +2,7 @@
 % J.Currie Apr 2023
 clc
 clear
+% Figure Position: [490   380   621   468]
 
 %% Sample Plant Model
 % Second Order, Underdamped, Stable
@@ -52,7 +53,7 @@ uMax = 1;
 
 pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax);
 [t,r] = makeTimeSetpoint(Ts,tFinal);
-simPID(Gs, pidParams, t, r, 0, 'PID Control w Anti Windup & U Saturation');
+simPID(Gs, pidParams, t, r*5, 0, 'PID Control w U Saturation (NO Anti Windup)');
 
 %% PID with Process Variable Only Derivative
 Kp = 0.5;
@@ -62,7 +63,7 @@ Tf = 0; % leave filter off
 uMin = -Inf;
 uMax = +Inf;
 c = 1; % Kp setpoint weight
-b = 0; % Kd setpoint weight
+b = 0.0; % Kd setpoint weight
 
 pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, c, b);
 [t,r] = makeTimeSetpoint(Ts,tFinal);
@@ -82,7 +83,7 @@ simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Noisy Measurements');
 Kp = 0.5;
 Ki = 0.2;
 Kd = 0.2;
-Tf = 0.2;
+Tf = 0.5;
 noiseVar = 0.5;
 
 pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf);
@@ -93,7 +94,7 @@ simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter and No
 Kp = 0.5;
 Ki = 0.2;
 Kd = 0.2;
-Tf = 0.2;
+Tf = 0.5;
 noiseVar = 0.5;
 uMin = -Inf;
 uMax = +Inf;
@@ -136,19 +137,16 @@ end
 n = length(t);
 u = zeros(size(t));
 y = zeros(size(t));
+ytrue = zeros(size(t));
 nx = size(Gzss.B,1);
 x0 = zeros(nx,1);
 
 % Simulate step by step
 for i = 1:n-1
-    if (i == 1)
-        yprev = 0;
-    else
-        yprev = y(i-1);
-    end
-    u(i) = mxCPID('update', r(i), yprev);
+    u(i) = mxCPID('update', r(i), y(i));
     [Y,~,X] = lsim(Gzss,[u(i) u(i)],[t(i) t(i+1)],x0);
-    y(i+1) = Y(end) + sqrt(noiseVar) * rand(1);
+    y(i+1) = Y(end) + sqrt(noiseVar) * randn(1);
+    ytrue(i+1) = Y(end);
     x0 = X(end,:);
 end
 % Copy final u
@@ -159,6 +157,9 @@ if (~isempty(plotTitle))
     subplot(211)
     plot(t,y);
     hold on;
+    if (noiseVar ~= 0)
+        plot(t,ytrue);
+    end
     stairs(t,r,'k:');
     hold off; grid on;
     ylabel('Plant Output [y]');
