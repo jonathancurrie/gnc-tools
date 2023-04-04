@@ -1,4 +1,8 @@
 classdef mxCPID_tests < matlab.unittest.TestCase
+    % Unit Tests for the mxCPID MEX Interface to the C PID controller
+    % J.Currie Apr 2023
+    % (Yes I Know Actual & Expected are flipped, but it reads easier to me
+    % this way)
     
     properties
         absTol = 1e-12;
@@ -6,6 +10,107 @@ classdef mxCPID_tests < matlab.unittest.TestCase
 
     methods(Test)
         % Test methods
+
+        function CheckInit(testCase)
+            % No params
+            clear mxCPID;
+            testCase.verifyError(@() mxCPID('init'),'GNCToolsMEX:Error');
+
+            % Check Inf/NaN for gains
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(Inf, 0, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(NaN, 0, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, Inf, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, NaN, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, Inf, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, NaN, 0.1)));
+            
+            % Check 0/I/ID/D only
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(0, 0, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(0, 1, 0, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(0, 0, 1, 0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(0, 1, 1, 0.1)));
+
+            % Check Ts
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 0, 0, 0)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 0, 0, -1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 0, 0, Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 0, 0, NaN)));
+
+            % Check Tf
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 0, 0, 0.1, 0.1))); % no D gain
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0))); % disabled OK
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, -1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, NaN)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.05)));
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.051)));
+
+            % Check b, c
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, -0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, NaN)));
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, -0.1)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, NaN)));
+
+            % Check uMin, uMax
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, NaN)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, 0, NaN)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, Inf, Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, -Inf)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, 0, 0)));
+            testCase.verifyEqual(int8(-1), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, 5, 2)));
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf)));            
+        end
+
+        function CheckUpdate(testCase)
+            % No init
+            clear mxCPID;
+            testCase.verifyError(@() mxCPID('update',1,1),'GNCToolsMEX:Error'); 
+
+            % Do init
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1)));
+
+            % Missing args
+            testCase.verifyError(@() mxCPID('update'),'GNCToolsMEX:Error');
+            testCase.verifyError(@() mxCPID('update', 1),'GNCToolsMEX:Error');
+            
+            % Get current control
+            [~,status] = mxCPID('update', 1, 0);
+            testCase.verifyEqual(int8(0), status);
+
+            % Inf/NaN setpoint
+            [~,status] = mxCPID('update', Inf, 0);
+            testCase.verifyEqual(int8(-1), status);
+             [~,status] = mxCPID('update', NaN, 0);
+            testCase.verifyEqual(int8(-1), status);
+
+            % Inf/NaN measurement
+            [~,status] = mxCPID('update', 1, Inf);
+            testCase.verifyEqual(int8(-1), status);
+             [~,status] = mxCPID('update', 1, NaN);
+            testCase.verifyEqual(int8(-1), status);                
+        end
+
+        function CheckReset(testCase)
+            % No init OK
+            testCase.verifyEqual(int8(0), mxCPID('reset'));
+
+            % Do init and couple updates, then reset and check
+            testCase.verifyEqual(int8(0), mxCPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1)));
+            [u0,status] = mxCPID('update', 1, 0);
+            testCase.verifyEqual(int8(0), status);
+            [u1,status] = mxCPID('update', 1, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyNotEqual(u0,u1);
+
+            testCase.verifyEqual(int8(0), mxCPID('reset'));
+            [u2,status] = mxCPID('update', 1, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(u0, u2);
+        end
         
         function POnly(testCase)
             Gs = tf(1.2, [0.5 0.3 0.2]);

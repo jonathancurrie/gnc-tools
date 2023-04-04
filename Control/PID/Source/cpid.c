@@ -151,6 +151,10 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     }
 
     // Check valid numerical values for a PID controller
+    if (Kp == (real_t)0.0) // need a proportional term
+    {
+        retCode += CPID_FAILURE;
+    }
     if (Ts <= (real_t)0.0)
     {
         retCode += CPID_FAILURE;
@@ -159,9 +163,16 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     {
         retCode += CPID_FAILURE;
     }
-    if ((Tf > (real_t)0.0) && (Tf <= ((real_t)0.5 * Ts))) // ensures stability
+    if (Tf > (real_t)0.0)
     {
-        retCode += CPID_FAILURE;
+        if (Kd == (real_t)0.0) // no D gain, but D filter?
+        {
+            retCode += CPID_FAILURE;
+        }
+        if (Tf <= ((real_t)0.5 * Ts)) // ensures stability
+        {
+            retCode += CPID_FAILURE;
+        }
     }
     if (c < (real_t)0.0)
     {
@@ -172,16 +183,13 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
         retCode += CPID_FAILURE;
     }
     // Check saturation bounds are sensible
-    if ((isinf(uMin) == 0) && (isinf(uMax) == 0))
+    if (uMin > uMax)
     {
-        if (uMin > uMax)
-        {
-            retCode += CPID_FAILURE;
-        }
-        if (uMin == uMax)
-        {
-            retCode += CPID_FAILURE;
-        }
+        retCode += CPID_FAILURE;
+    }
+    if (uMin == uMax)
+    {
+        retCode += CPID_FAILURE;
     }
 
     // Check if worth proceeding
