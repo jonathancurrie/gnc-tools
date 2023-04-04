@@ -41,7 +41,7 @@ typedef struct
 	real_t Ki;			//!< Integral Gain 
 	real_t Kd;			//!< Derivative Gain 
 	real_t Tf;			//!< Derivative filter time constant
-	real_t Ts;			//!< Sample interval [s] 
+	real_t Ts;			//!< Sampling interval (nominally seconds) 
 	real_t uMin;		//!< Minimum control move
     real_t uMax;		//!< Maximum control move
     real_t b;           //!< Setpoint weight on proportional term
@@ -68,7 +68,7 @@ typedef struct
  * @param uMax          Maximum control move (controller output, set to +Inf if not required)
  * @param b             Setpoint weight on proportional term (error = b*r - y), default 1, >= 0
  * @param c             Setpoint weight on derivative term (error = c*r - y), default 1, >= 0
- * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
+ * @return int8_t       Return code (CPID_SUCCESS on success, -ve failure)
  */
 int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c);
 
@@ -81,7 +81,7 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
  * @param r             The current setpoint
  * @param y             The current plant output
  * @param u             A pointer to the computed control move (controller output)
- * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
+ * @return int8_t       Return code (CPID_SUCCESS on success, -ve failure)
  */
 int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u);
 
@@ -90,7 +90,7 @@ int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u);
  * @brief               PID controller reset
  * 
  * @param pid           A pointer to an initialized C PID data structure
- * @return uint8_t      Return code (CPID_SUCCESS on success, -ve failure)
+ * @return int8_t       Return code (CPID_SUCCESS on success, -ve failure)
  */
 int8_t cpidReset(cpidData_t* pid);
 
