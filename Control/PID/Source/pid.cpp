@@ -79,7 +79,7 @@ int PIDParams::makeCData(cpidData_t* pidData) const
 {
     // Use init function to convert (and check) to C struct
     // Null check internal
-    return cpidInit(pidData, Kp, Ki, Kd, Tf, Ts, uMin, uMax, b, c);
+    return cpidInit(pidData, Kp, Ki, Kd, Tf, Ts, uMin, uMax, b, c, rRampMax);
 }
 
 }

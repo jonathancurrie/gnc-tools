@@ -62,7 +62,14 @@ classdef mxPID_tests < matlab.unittest.TestCase
             testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, -Inf)));
             testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, 0, 0)));
             testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, 5, 2)));
-            testCase.verifyEqual(int8(0), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf)));            
+            testCase.verifyEqual(int8(0), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf)));   
+
+            % Check rRampMax
+            testCase.verifyEqual(int8(0), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf, Inf)));
+            testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf, -Inf)));
+            testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf, NaN)));
+            testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf, 0)));
+            testCase.verifyEqual(int8(-1), mxPID('init',testCase.makeTestControllerParams(1, 1, 1, 0.1, 0.1, 0, 0, -Inf, Inf, -1)));
         end
 
         function CheckUpdate(testCase)
@@ -284,7 +291,7 @@ classdef mxPID_tests < matlab.unittest.TestCase
     
     % Test Helpers
     methods(Static)
-        function params = makeTestControllerParams(Kp, Ki, Kd, Ts, Tf, b, c, uMin, uMax)
+        function params = makeTestControllerParams(Kp, Ki, Kd, Ts, Tf, b, c, uMin, uMax, rRampMax)
             params.Kp = Kp;
             params.Ki = Ki;
             params.Kd = Kd;
@@ -294,6 +301,7 @@ classdef mxPID_tests < matlab.unittest.TestCase
             if (nargin > 6), params.c = c; else, params.c = 1; end
             if (nargin > 7), params.uMin = uMin; else, params.uMin = -inf; end
             if (nargin > 8), params.uMax = uMax; else, params.uMax = +inf; end
+            if (nargin > 9), params.rRampMax = rRampMax; else, params.rRampMax = +inf; end
         end
         
         function sse = testController(Gs, params, tFinal)

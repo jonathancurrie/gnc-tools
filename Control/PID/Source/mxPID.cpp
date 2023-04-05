@@ -58,6 +58,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             params.uMax = MEX::getDoubleScalarField(pPARAMS, "uMax");
             params.b = MEX::getDoubleScalarField(pPARAMS, "b");
             params.c = MEX::getDoubleScalarField(pPARAMS, "c");
+            params.rRampMax = MEX::getDoubleScalarField(pPARAMS, "rRampMax");
 
             // Call constructor
             pid = PID(params);
@@ -132,7 +133,7 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
         {
             MEX::error("The parameters argument must be a valid structure");
         }
-        MEX::checkForRequiredFields(pPARAMS, {"Kp","Ki","Kd","Tf","Ts","uMin","uMax","b","c"});
+        MEX::checkForRequiredFields(pPARAMS, {"Kp","Ki","Kd","Tf","Ts","uMin","uMax","b","c","rRampMax"});
 
         return Command::Init;
     }

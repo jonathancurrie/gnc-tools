@@ -69,6 +69,7 @@ namespace GNCTools
             double c  = 1.0;    //!< Setpoint weight on derivative term (error = c*r - y), default 1, >= 0
             double uMin = -std::numeric_limits<double>::infinity();     //!< Minimum control move (controller output, set to -Inf if not required)
             double uMax = +std::numeric_limits<double>::infinity();     //!< Maximum control move (controller output, set to +Inf if not required)
+            double rRampMax = +std::numeric_limits<double>::infinity(); //!< Maximum setpoint rate of change per sample (set to +Inf if not required)
     };
 
     /**
