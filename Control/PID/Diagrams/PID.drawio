@@ -1,0 +1,62 @@
+<mxfile host="Electron" modified="2023-04-05T02:21:13.932Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.1.2 Chrome/106.0.5249.199 Electron/21.4.3 Safari/537.36" etag="UK-053Gz8jT-5mqbsX3F" version="21.1.2" type="device">
+  <diagram name="Page-1" id="S4daSKGdH0BvfIMcc-qO">
+    <mxGraphModel dx="757" dy="571" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-4" value="y&lt;sub&gt;true&lt;/sub&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="JiuXzkqEZoc6iIksHYIG-1" target="JiuXzkqEZoc6iIksHYIG-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-1" value="Plant" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="480" y="240" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-5" value="u" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="JiuXzkqEZoc6iIksHYIG-2" target="JiuXzkqEZoc6iIksHYIG-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="280" />
+              <mxPoint x="430" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-7" value="r" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" target="JiuXzkqEZoc6iIksHYIG-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="219.9999999999999" y="260.0344827586207" as="targetPoint" />
+            <mxPoint x="200" y="260" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-2" value="PID&lt;br&gt;Controller" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="320" y="240" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-10" value="y" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="JiuXzkqEZoc6iIksHYIG-3" target="JiuXzkqEZoc6iIksHYIG-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="280" />
+              <mxPoint x="660" y="360" />
+              <mxPoint x="300" y="360" />
+              <mxPoint x="300" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-3" value="" style="shape=sumEllipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="270" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-8" value="u&lt;sub&gt;man&lt;/sub&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="279.66" as="targetPoint" />
+            <mxPoint x="200" y="279.66" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="260" y="279.66" />
+              <mxPoint x="260" y="279.66" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JiuXzkqEZoc6iIksHYIG-9" value="noise" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" target="JiuXzkqEZoc6iIksHYIG-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="150" as="targetPoint" />
+            <mxPoint x="630" y="200" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
