@@ -46,12 +46,15 @@ typedef struct
     real_t uMax;		//!< Maximum control move
     real_t b;           //!< Setpoint weight on proportional term
     real_t c;           //!< Setpoint weight on derivative term
+	real_t rRampMax;	//!< Maximum setpoint rate of change per sample
 	real_t invTs;       //!< Internal precalculated 1.0/Ts
 	real_t xI;		    //!< Internal integral state
-	real_t xD;		    //!< Internal derivative filter state		
+	real_t xD;		    //!< Internal derivative filter state
+	real_t xR;			//!< Internal setpoint ramp state		
 	uint8_t useI;		//!< Internal integral control flag
 	uint8_t useD;		//!< Internal derivative control flag
 	uint8_t useDFilt;	//!< Internal derivative filter control flag
+	uint8_t useRRamp;	//!< Internal setpoint ramp control flag
 } cpidData_t;
 
 
@@ -68,9 +71,11 @@ typedef struct
  * @param uMax          Maximum control move (controller output, set to +Inf if not required)
  * @param b             Setpoint weight on proportional term (error = b*r - y), default 1, >= 0
  * @param c             Setpoint weight on derivative term (error = c*r - y), default 1, >= 0
+ * @param rRampMax      Maximum setpoint rate of change per sample (set to +Inf if not required)
  * @return int8_t       Return code (CPID_SUCCESS on success, -ve failure)
  */
-int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c);
+int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, 
+				real_t uMin, real_t uMax, real_t b, real_t c, real_t rRampMax);
 
 
 /**

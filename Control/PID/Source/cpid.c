@@ -43,12 +43,30 @@ int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u)
     {
         return CPID_FAILURE;
     }
+    
+    // Ramp setpoint as required
+    if (pid->useRRamp)
+    {
+        real_t deltaR = r - pid->xR;
+        if (deltaR > (real_t)0.0)
+        {
+            pid->xR += fmin(deltaR, pid->rRampMax);
+        }
+        else
+        {
+            pid->xR -= fmin(-deltaR, pid->rRampMax);
+        }
+    }
+    else
+    {
+        pid->xR = r;
+    }
 
     // Compute integral term
     real_t iError = (real_t)0.0;
     if (pid->useI)
     {
-        iError = pid->Ki * (r - y);
+        iError = pid->Ki * (pid->xR - y);
     }
 
     // Compute derivative term
@@ -61,14 +79,14 @@ int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u)
         if (pid->useDFilt)
         {
             // Derivative term
-            dError = pid->Kd * (pid->c * r - y);
+            dError = pid->Kd * (pid->c * pid->xR - y);
             // Filter contribution
             dError = (dError - lastDError) / pid->Tf;
         }
         else
         {
             // Derivative term
-            dError = pid->Kd * (pid->c * r - y) * pid->invTs;
+            dError = pid->Kd * (pid->c * pid->xR - y) * pid->invTs;
             // Save as the most recent derivative * error
             pid->xD = dError;
             // Subtract the previous step
@@ -77,7 +95,7 @@ int8_t cpidUpdate(cpidData_t* pid, real_t r, real_t y, real_t* u)
     }
 
     // Compute proportional term
-    real_t kError = pid->Kp * (pid->b * r - y);
+    real_t kError = pid->Kp * (pid->b * pid->xR - y);
 
     // Compute controller output based on control law
     *u = kError + pid->xI + dError;
@@ -120,7 +138,8 @@ real_t forwardEuler(real_t y, real_t yprev, real_t ts)
 //
 // PID Controller Data Structure Initialization
 //
-int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, real_t uMin, real_t uMax, real_t b, real_t c)
+int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, real_t Ts, 
+                real_t uMin, real_t uMax, real_t b, real_t c, real_t rRampMax)
 {
     // Assert we can sum the failure code (compile time check)
     static_assert(CPID_FAILURE != 0, "Require CPID_FAILURE to be != 0");
@@ -140,12 +159,16 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     retCode += isValidReal(Ts);
     retCode += isValidReal(b);
     retCode += isValidReal(c);
-    // umin/umax may be Inf, check for NaN
+    // umin/umax/rRampMax may be Inf, check for NaN
     if (isnan(uMin))
     {
         retCode += CPID_FAILURE;
     }
     if (isnan(uMax))
+    {
+        retCode += CPID_FAILURE;
+    }
+    if (isnan(rRampMax))
     {
         retCode += CPID_FAILURE;
     }
@@ -191,6 +214,11 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     {
         retCode += CPID_FAILURE;
     }
+    // Check ramp rate
+    if (rRampMax <= (real_t)0.0)
+    {
+        retCode += CPID_FAILURE;
+    }
 
     // Check if worth proceeding
     if (retCode != CPID_SUCCESS)
@@ -211,12 +239,14 @@ int8_t cpidInit(cpidData_t* pid, real_t Kp, real_t Ki, real_t Kd, real_t Tf, rea
     pid->uMax       = uMax;
     pid->b          = b;
     pid->c          = c;
+    pid->rRampMax   = rRampMax;
 
     // Compute derived internal parameters
     pid->invTs      = (real_t)1.0 / pid->Ts;
     pid->useI       = (pid->Ki != (real_t)0.0);
     pid->useD       = (pid->Kd != (real_t)0.0);
     pid->useDFilt   = (pid->Tf > (real_t)0.0);
+    pid->useRRamp   = (isinf(pid->rRampMax) == 0);
 
     return retCode;
 }
@@ -236,6 +266,7 @@ int8_t cpidReset(cpidData_t* pid)
     // Reset integrated terms
     pid->xD = (real_t)0.0;
     pid->xI = (real_t)0.0;
+    pid->xR = (real_t)0.0;
 
     return CPID_SUCCESS;
 }

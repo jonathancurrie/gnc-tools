@@ -21,6 +21,7 @@ using namespace GNCTools;
 #define pU      plhs[0]
 #define pSTAT0  plhs[0]
 #define pSTAT1  plhs[1]
+#define pROUT   plhs[2]
 
 // C PID controller stored between calls
 static cpidData_t pid;
@@ -46,8 +47,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         case Command::Init:
         {
             // Create output memory
-            pSTAT0 = MEX::createInt8(0);
-            int8_t* status = static_cast<int8_t*>(mxGetData(pSTAT0));
+            pSTAT0 = MEX::createInt8(0);            
+            int8_t* status = static_cast<int8_t*>(mxGetData(pSTAT0));            
             // Get inputs
             double Kp = MEX::getDoubleScalarField(pPARAMS, "Kp");
             double Ki = MEX::getDoubleScalarField(pPARAMS, "Ki");
@@ -58,9 +59,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             double uMax = MEX::getDoubleScalarField(pPARAMS, "uMax");
             double b = MEX::getDoubleScalarField(pPARAMS, "b");
             double c = MEX::getDoubleScalarField(pPARAMS, "c");
+            double rRampMax = MEX::getDoubleScalarField(pPARAMS, "rRampMax");
 
             // Call init
-            *status = cpidInit(&pid, Kp, Ki, Kd, Tf, Ts, uMin, uMax, b, c);
+            *status = cpidInit(&pid, Kp, Ki, Kd, Tf, Ts, uMin, uMax, b, c, rRampMax);
             if (*status == CPID_SUCCESS)
             {
                 initCalled = true;
@@ -79,14 +81,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             // Create output memory
             pU     = MEX::createDoubleScalar(0.0);
             pSTAT1 = MEX::createInt8(0);
+            pROUT  = MEX::createDoubleScalar(0.0);            
             // Get pointers
             double* u = mxGetPr(pU);
             int8_t* status = static_cast<int8_t*>(mxGetData(pSTAT1));
+            double* rOut = mxGetPr(pROUT);
             double* r = mxGetPr(pR);
             double* y = mxGetPr(pY);    
 
             // Call update
             *status = cpidUpdate(&pid, *r, *y, u);
+            *rOut = pid.xR; // For setpoint ramp plotting
             break;
         }
         case Command::Reset:
@@ -132,7 +137,7 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
         {
             MEX::error("The parameters argument must be a valid structure");
         }
-        MEX::checkForRequiredFields(pPARAMS, {"Kp","Ki","Kd","Tf","Ts","uMin","uMax","b","c"});
+        MEX::checkForRequiredFields(pPARAMS, {"Kp","Ki","Kd","Tf","Ts","uMin","uMax","b","c","rRampMax"});
 
         return Command::Init;
     }

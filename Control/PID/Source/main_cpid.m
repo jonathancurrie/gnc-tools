@@ -25,6 +25,7 @@ params.c  = 0.1; % D
 params.b  = 1; % K
 params.uMin = -1.5;
 params.uMax = +1.5;
+params.rRampMax = Inf;
 
 % Initialize C PID
 mxCPID('init',params);
@@ -36,7 +37,7 @@ tFinal = 10;
 
 % Simulink Setup
 t = (0:params.Ts:tFinal)';
-r = 1.5*ones(size(t)); %r(1:10) = 0;
+r = 1.5*ones(size(t)); r(1:20) = 0;
 simin.time = t;  % used in Simulink
 simin.signals.values = r;
 
@@ -73,6 +74,11 @@ hold off;
 grid on; ylabel('Closed Loop Output [y]');
 xlabel('Time');
 
+%% Lsim Comparison
+clf
+[yl,tl] = lsim(Gz,uj,t);
+plot(tl,yl)
+
 %% Test against MATLAB
 clc
 clf
@@ -86,6 +92,7 @@ params.c  = 0;
 params.b  = 1;
 params.uMin = -inf; % note ML pid2 doesn't support limits, only SL
 params.uMax = +inf;
+params.rRampMax = Inf;
 
 mxCPID('Init',params)
       
