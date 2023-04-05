@@ -127,6 +127,13 @@ namespace GNCTools
             bool isInitialized(void) const { return _initialized; }
 
             /**
+             * @brief           Return a constant reference to the internal C PID Data Structure
+             * 
+             * @return const cpidData_t& The C PID data structure
+             */
+            const cpidData_t& getCPIDData(void) const { return _pidData; }
+
+            /**
              * @brief           Static helper to check parameter validity
              * 
              * @param params    A PIDParams object containing the tuning information

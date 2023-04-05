@@ -21,6 +21,7 @@ using namespace GNCTools;
 #define pU      plhs[0]
 #define pSTAT0  plhs[0]
 #define pSTAT1  plhs[1]
+#define pROUT   plhs[2]
 
 // PID controller stored between calls
 static PID pid;
@@ -80,14 +81,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             // Create output memory
             pU     = MEX::createDoubleScalar(0.0);
             pSTAT1 = MEX::createInt8(0);
+            pROUT  = MEX::createDoubleScalar(0.0);   
             // Get pointers
             double* u = mxGetPr(pU);
             int8_t* status = static_cast<int8_t*>(mxGetData(pSTAT1));
+            double* rOut = mxGetPr(pROUT);
             double* r = mxGetPr(pR);
             double* y = mxGetPr(pY);    
 
             // Call update
             *status = pid.update(*r, *y, *u);
+            *rOut = pid.getCPIDData().xR; // For setpoint ramp plotting
             break;
         }
         case Command::Reset:

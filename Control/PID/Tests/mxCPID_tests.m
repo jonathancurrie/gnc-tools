@@ -287,6 +287,49 @@ classdef mxCPID_tests < matlab.unittest.TestCase
             testCase.verifyEqual(0, testCase.testController(Gs, testParams2, tFinal), 'AbsTol', testCase.absTol);
             testCase.verifyEqual(0, testCase.testController(Gs, testParams3, tFinal), 'AbsTol', testCase.absTol);
         end 
+
+        function PIDSetpointRamp(testCase)            
+            rRampMax = 0.3;
+            r = 1;
+            testParams = testCase.makeTestControllerParams(1.5, 1, 1.2, 0.1, 0, 1, 1, -Inf, Inf, rRampMax);
+
+            % Do init
+            testCase.verifyEqual(int8(0), mxCPID('init',testParams));
+            
+            % Do all updates one by one ramping up
+            [~,status,rOut] = mxCPID('update', r, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(rRampMax, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', r, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(rRampMax*2, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', r, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(rRampMax*3, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', r, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(r, rOut);
+
+            % Now ramping back down
+            [~,status,rOut] = mxCPID('update', 0, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(r-rRampMax, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', 0, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(r-rRampMax*2, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', 0, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(r-rRampMax*3, rOut, 'AbsTol', testCase.absTol);
+
+            [~,status,rOut] = mxCPID('update', 0, 0);
+            testCase.verifyEqual(int8(0), status);
+            testCase.verifyEqual(0, rOut);
+        end
     end
     
     % Test Helpers

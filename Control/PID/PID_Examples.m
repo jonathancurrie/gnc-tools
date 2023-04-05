@@ -4,6 +4,8 @@ clc
 clear
 % set(gcf,'position',[490   380   621   468])
 
+% Also see Control/PID/Tests/mxCPID_tests.m for unit testing.
+
 %% Sample Plant Model
 % Second Order, Underdamped, Stable
 clc
