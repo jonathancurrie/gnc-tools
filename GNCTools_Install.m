@@ -58,6 +58,7 @@ rInd{:,:,i} = strfind(genp,'Diagrams'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'Documentation'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'Source'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'Tests'); i = i + 1;
+rInd{:,:,i} = strfind(genp,['Utilities' filesep 'Install']); i = i + 1;
 rInd{:,:,i} = strfind(genp,'slprj'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'.vscode'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'.git'); 
@@ -99,7 +100,7 @@ else
     in = bool2yn(runTests);
 end
 if(strcmpi(in,'y'))
-    GNCTools_Install_Test(1);
+    GNCTools_InstallTest;
 end
 
 %Launch Examples page
