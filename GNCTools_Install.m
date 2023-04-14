@@ -100,7 +100,14 @@ else
     in = bool2yn(runTests);
 end
 if(strcmpi(in,'y'))
-    GNCTools_InstallTest;
+    try
+        cd('Utilities/Install');
+        GNCTools_InstallTest;
+    catch ME
+        cd(cpath);
+        rethrow(ME);
+    end
+    cd(cpath);
 end
 
 %Launch Examples page
