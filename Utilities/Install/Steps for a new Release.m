@@ -2,8 +2,8 @@
 
 % Local
 % 1) Update gnctoolsver version, release notes and date
-% 2) Rebuild MEX files
-% 3) Run GNCTools_RunTests to run all unit tests
+% 2) Run GNCTools_MexInstall to rebuild MEX files
+% 3) Run GNCTools_RunUnitTests to run all unit tests
 % 4) Run GNCTools_package to update Contents file
 
 % Git

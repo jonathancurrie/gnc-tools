@@ -1,4 +1,4 @@
-function output = GNCTools_RunTests
+function output = GNCTools_RunUnitTests
 % Run all GNCTools Unit Tests
 
 clc

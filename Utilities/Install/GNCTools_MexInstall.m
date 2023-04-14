@@ -1,4 +1,4 @@
-function GNCTools_Mex_Install()
+function GNCTools_MexInstall()
 %% Mex Install File
 
 %%
