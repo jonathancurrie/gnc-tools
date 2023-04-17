@@ -73,7 +73,7 @@ stairs(t,u_pd);
 stairs(t,u_pid);
 hold off;
 grid on;
-ylabel('Control Output [u]');
+ylabel('Control Input [u]');
 xlabel('Time [s]');
 
 %% PID with Anti Windup + U Saturation
@@ -124,7 +124,7 @@ stairs(t,u_pv05);
 stairs(t,u_pv);
 hold off;
 grid on;
-ylabel('Control Output [u]');
+ylabel('Control Input [u]');
 xlabel('Time [s]');
 
 %% PID with Noisy Measurements
@@ -212,7 +212,7 @@ stairs(t,u);
 hold on;
 stairs(t,uNoRamp);
 hold off; grid on;
-ylabel('Control Output [u]');
+ylabel('Control Input [u]');
 xlabel('Time [s]');
 
 %% PID with Setpoint Ramp RETUNED
@@ -253,8 +253,31 @@ stairs(t,u);
 hold on;
 stairs(t,uNoRamp);
 hold off; grid on;
-ylabel('Control Output [u]');
+ylabel('Control Input [u]');
 xlabel('Time [s]');
+
+
+%% Linear Analysis
+clc
+Kp = 0.5;
+Ki = 0.2;
+Kd = 0.2;
+Tf = 0.0;
+b = 1; % Kp setpoint weight
+c = 0; % Kd setpoint weight
+
+mlPID = pid2(Kp, Ki, Kd, Tf, b, c, Ts, ...
+             'IFormula', 'ForwardEuler', 'DFormula', 'ForwardEuler');
+mlPID.InputName{1} = 'r';
+mlPID.InputName{2} = 'y';
+mlPID.OutputName = 'u';
+         
+Gz = c2d(Gs, Ts);
+Gz.InputName = 'u';
+Gz.OutputName = 'y';
+% step(Gz)
+
+clModel = connect(Gz,mlPID,'r','y','u');
 
 
 %% Local Functions
@@ -314,7 +337,7 @@ if (~isempty(plotTitle))
     subplot(212);
     stairs(t,u);
     grid on;
-    ylabel('Control Output [u]');
+    ylabel('Control Input [u]');
     xlabel('Time [s]');
 end
 end
