@@ -32,9 +32,11 @@ class MEX
         // Data Access
         static double getDoubleScalar(const mxArray* data);
         static double getDoubleScalarField(const mxArray* data, const char* field);
+        static double getDoubleScalarProperty(const mxArray* data, const char* className, const char* property);
         static std::string getString(const mxArray* data);
         static bool getLogicalScalar(const mxArray* data);
         static mxArray* getField(const mxArray* data, const char* fieldName);
+        static mxArray* getProperty(const mxArray* data, const char* className, const char* propertyName);
         static size_t getNumElem(const mxArray* data) noexcept;
         static size_t getNumRows(const mxArray* data) noexcept;
         static size_t getNumCols(const mxArray* data) noexcept;
@@ -51,15 +53,20 @@ class MEX
         static bool isString(const mxArray* data) noexcept;
         static bool isValidStruct(const mxArray* data) noexcept;
         static bool isValidField(const mxArray* data, const char* field) noexcept;
+        static bool isValidClass(const mxArray* data, const char* className) noexcept;
+        static bool isValidProperty(const mxArray* data, const char* className, const char* property) noexcept;
         static bool isFunction(const mxArray* data) noexcept;
         static bool containsNaNInf(const mxArray* data); // throws if not double supplied
 
         // Data Validation (throws if not)
         static bool checkForRequiredFields(const mxArray* data, const std::vector<std::string>& fields);
+        static bool checkForRequiredProperties(const mxArray* data, const char* className, const std::vector<std::string>& properties);
 
         // Error Reporting (throws exception too)
         static void error(const char* id, const char* format, ...); 
         static void error(const char* format, ...); 
+        static void warning(const char* id, const char* format, ...) noexcept; 
+        static void warning(const char* format, ...) noexcept; 
 };
 
 //

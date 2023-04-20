@@ -56,6 +56,11 @@ namespace GNCTools
     {
         return MEX::getDoubleScalar(MEX::getField(data, field));
     }
+
+    double MEX::getDoubleScalarProperty(const mxArray* data, const char* className, const char* property)
+    {
+        return MEX::getDoubleScalar(MEX::getProperty(data, className, property));
+    }
     
     std::string MEX::getString(const mxArray* data)
     {
@@ -108,7 +113,18 @@ namespace GNCTools
             return mxGetField(data, 0, fieldName);
         }
         
-        MEX::error("Cannot access field '%s' in structure", fieldName);
+        MEX::error("GNCToolsMEX:FieldError","Cannot access field '%s' in structure", fieldName);
+        return nullptr;
+    }
+
+    mxArray* MEX::getProperty(const mxArray* data, const char* className, const char* propertyName)
+    {
+        if (MEX::isValidProperty(data, className, propertyName))
+        {
+            return mxGetProperty(data, 0, propertyName);
+        }
+        
+        MEX::error("GNCToolsMEX:PropError","Cannot access property '%s' in object '%s'", propertyName, className);
         return nullptr;
     }
 
@@ -244,6 +260,28 @@ namespace GNCTools
         }
         return false;
     }
+
+    bool MEX::isValidClass(const mxArray* data, const char* className) noexcept
+    {
+        if ((data != nullptr) && (className != nullptr))
+        {
+            return mxIsClass(data, className);
+        }
+        return false;
+    }
+
+    bool MEX::isValidProperty(const mxArray* data, const char* className, const char* property) noexcept
+    {
+        if (MEX::isValidClass(data, className) && (property != nullptr))
+        {
+            mxArray* temp = mxGetProperty(data, 0, property);
+            if (temp != nullptr)
+            {
+                return (mxIsEmpty(temp) == false);
+            }
+        }
+        return false;
+    }
     
     bool MEX::checkForRequiredFields(const mxArray* data, const std::vector<std::string>& fields)
     {
@@ -252,6 +290,20 @@ namespace GNCTools
             if (MEX::isValidField(data, str.c_str()) == false)
             {
                 MEX::error("GNCToolsMEX:StructError","The structure was missing the field '%s', or it was empty", str.c_str());
+                return false;
+            }
+        }
+        // OK by here
+        return true;
+    }
+
+    bool MEX::checkForRequiredProperties(const mxArray* data, const char* className, const std::vector<std::string>& properties)
+    {
+        for (const std::string& str : properties)
+        {
+            if (MEX::isValidProperty(data, className, str.c_str()) == false)
+            {
+                MEX::error("GNCToolsMEX:ClassError","The object '%s' was missing the field '%s', or it was empty", className, str.c_str());
                 return false;
             }
         }
@@ -287,10 +339,10 @@ namespace GNCTools
     //
     void MEX::error(const char* id, const char* format, ...)
     {
-        char errBuf[1024];
+        char errBuf[2048];
         va_list args;
         va_start(args, format);
-        vsnprintf(errBuf, 1024, format, args);
+        vsnprintf(errBuf, 2048, format, args);
         va_end(args);
         
         // Generates Exception
@@ -307,6 +359,31 @@ namespace GNCTools
         
         // Generates Exception
         mexErrMsgIdAndTxt("GNCToolsMEX:Error",errBuf);
+    }
+
+    //
+    // Warning Reporting (allows continuing)
+    // 
+    void MEX::warning(const char* id, const char* format, ...) noexcept
+    {
+        char warnBuf[2048];
+        va_list args;
+        va_start(args, format);
+        vsnprintf(warnBuf, 2048, format, args);
+        va_end(args);
+
+        mexWarnMsgIdAndTxt(id, warnBuf);
+    }
+
+    void MEX::warning(const char* format, ...) noexcept
+    {
+        char warnBuf[2048];
+        va_list args;
+        va_start(args, format);
+        vsnprintf(warnBuf, 2048, format, args);
+        va_end(args);
+
+        mexWarnMsgIdAndTxt("GNCToolsMEX:Warning", warnBuf);
     }
 
 
