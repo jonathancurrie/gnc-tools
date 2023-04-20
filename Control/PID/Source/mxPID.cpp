@@ -254,7 +254,7 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
     if (nrhs < 1)
     {
         const char* mexName = mexFunctionName();
-        MEX::error("GNCToolsMEX:mxPID", "Usage: %s('Init',params), u = %s('Update',r,y), or %s('Reset')", mexName, mexName, mexName);
+        MEX::error("GNCToolsMEX:mxPID", "Usage: %s('Init',params), u = %s('Update',r,y), %s('getParams'), %s('getPID'), or %s('Reset')", mexName, mexName, mexName);
     }
     
     // Get command

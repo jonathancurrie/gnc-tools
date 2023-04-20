@@ -178,6 +178,58 @@ pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
 [t,r] = makeTimeSetpoint(Ts,tFinal);
 simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter, PV Only Derivative and Noisy Measurements RETUNED');
 
+%% PID Setpoint Weighting
+clf
+Kp = 0.5;
+Ki = 0.2;
+Kd = 0.2;
+Tf = 0;
+uMin = -Inf;
+uMax = +Inf;
+b = 1; % Kp setpoint weight
+c = 1; % Kd setpoint weight
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_1_1, y_1_1] = simPID(Gs, pidParams, t, r);
+
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, c);
+[u_05_1, y_05_1] = simPID(Gs, pidParams, t, r);
+
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, c);
+[u_0_1, y_0_1] = simPID(Gs, pidParams, t, r);
+
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 1.0, 0.5);
+[u_1_05, y_1_05] = simPID(Gs, pidParams, t, r);
+
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, 0.5);
+[u_05_05, y_05_05] = simPID(Gs, pidParams, t, r);
+
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, 0.5);
+[u_0_05, y_0_05] = simPID(Gs, pidParams, t, r);
+
+subplot(211)
+plot(t,y_1_1,t,y_1_05,t,y_05_1,t,y_05_05,t,y_0_1,t,y_0_05);
+hold on;
+stairs(t,r,'k:');
+hold off; grid on;
+ylabel('Plant Output [y]');
+title('PID Setpoint Weighting');
+legend('PID b = 1, c = 1','PID b = 1, c = 0.5','PID b = 0.5, c = 1',...
+       'PID b = 0.5, c = 0.5','PID b = 0, c = 1','PID b = 0, c = 0.5')
+
+subplot(212);
+stairs(t,u_1_1);
+hold on;
+stairs(t,u_1_05);
+stairs(t,u_05_1);
+stairs(t,u_05_05);
+stairs(t,u_0_1);
+stairs(t,u_0_05);
+hold off;
+grid on;
+ylabel('Control Input [u]');
+xlabel('Time [s]');
+
 %% PID with Setpoint Ramp
 Kp = 0.5;
 Ki = 0.2;
@@ -215,69 +267,41 @@ hold off; grid on;
 ylabel('Control Input [u]');
 xlabel('Time [s]');
 
-%% PID with Setpoint Ramp RETUNED
-Kp = 5;
-Ki = 0.8;
-Kd = 1;
-Tf = 0;
+
+%% PID Tuning
+clc
+Gz = c2d(Gs, Ts);
+mlPID = pidtune(Gz,'PIDF2',1.5)
 uMin = -Inf;
 uMax = +Inf;
-b = 1; % Kp setpoint weight
-c = 0; % Kd setpoint weight
-rRampMax = 0.05;
+rRampMax = +Inf;
+noiseVar = 0.0;
 
-pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c, rRampMax);
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
 [t,r] = makeTimeSetpoint(Ts,tFinal);
-[u,y,rOut] = simPID(Gs, pidParams, t, r);
-
-Kp = 0.5;
-Ki = 0.2;
-Kd = 0.2;
-
-pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[uNoRamp,yNoRamp] = simPID(Gs, pidParams, t, r);
-
-% Manual Plot
-subplot(211)
-plot(t,y,t,yNoRamp);
-hold on;
-stairs(t,r,'k:');
-stairs(t,rOut,'k:');
-hold off; grid on;
-ylabel('Plant Output [y]');
-title('PID Setpoint Ramp Comparison with Retune');
-legend('With Ramp Retune','No Ramp Orig Tune','location','best')
-
-subplot(212);
-stairs(t,u);
-hold on;
-stairs(t,uNoRamp);
-hold off; grid on;
-ylabel('Control Input [u]');
-xlabel('Time [s]');
+[u,y,rOut] = simPID(Gs, pidParams, t, r, noiseVar, 'PIDTuner Tuned');
 
 
-%% Linear Analysis
+%% Stability Analysis
 clc
-Kp = 0.5;
-Ki = 0.2;
-Kd = 0.2;
-Tf = 0.0;
-b = 1; % Kp setpoint weight
-c = 0; % Kd setpoint weight
 
-mlPID = pid2(Kp, Ki, Kd, Tf, b, c, Ts, ...
-             'IFormula', 'ForwardEuler', 'DFormula', 'ForwardEuler');
-mlPID.InputName{1} = 'r';
-mlPID.InputName{2} = 'y';
-mlPID.OutputName = 'u';
-         
-Gz = c2d(Gs, Ts);
-Gz.InputName = 'u';
-Gz.OutputName = 'y';
-% step(Gz)
+% Convert ML PID controller to analyzable form
+% https://au.mathworks.com/help/control/ref/pid2.getcomponents.html
+[Cfr,Xfr] = getComponents(mlPID,'filter')
 
-clModel = connect(Gz,mlPID,'r','y','u');
+% Build Open Loop System
+CG_OL = Cfr * Gz
+
+% And Closed Loop System
+CG_CL_nom = Xfr*feedback(Gz*Cfr,1)
+
+% Compute stability margin
+[Gm,Pm] = margin(CG_OL)
+margin(CG_OL);
+
+%% Remove margin via increasing gain
+
+stepplot(Xfr*feedback(Gz*Gm*Cfr,1), CG_CL_nom)
 
 
 %% Local Functions
