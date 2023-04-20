@@ -22,6 +22,11 @@ namespace GNCTools
         return mxCreateDoubleScalar(val);
     }
 
+    mxArray* MEX::createDoubleMatrix(size_t nrow, size_t ncol) noexcept
+    {
+        return mxCreateDoubleMatrix(nrow, ncol, mxREAL);
+    }
+
     mxArray* MEX::createUInt8(uint8_t val) noexcept
     {
         mxArray* ptr = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
@@ -38,6 +43,63 @@ namespace GNCTools
         return ptr;
     }
 
+    mxArray* MEX::createStruct(const char* fieldNames[], int numFields)
+    {
+        if ((fieldNames == nullptr) || (numFields <= 0))
+        {
+            MEX::error("GNCToolsMEX:createStruct","Error creating structure with %d fields", numFields);
+            return nullptr;
+        }
+        return mxCreateStructMatrix(1, 1, numFields, fieldNames);
+    }
+
+    double* MEX::createFieldDoubleScalar(mxArray* data, const char* fieldName, double val)
+    {
+        if (MEX::isValidStruct(data) && (fieldName != nullptr))
+        { 
+            mxArray* field = MEX::createDoubleScalar(val);
+            mxSetField(data, 0, fieldName, field);
+            return mxGetPr(field);
+        }
+        else
+        {
+            MEX::error("GNCToolsMEX:createFieldDoubleScalar","Cannot create double scalar within structure field '%s'", fieldName);
+            return nullptr;
+        }
+    }
+
+    double* MEX::createFieldDoubleMatrix(mxArray* data, const char* fieldName, size_t nrow, size_t ncol)
+    {
+        if (MEX::isValidStruct(data) && (fieldName != nullptr))
+        { 
+            mxArray* field = MEX::createDoubleMatrix(nrow, ncol);
+            if (field != nullptr)
+            {
+                mxSetField(data, 0, fieldName, field);
+                return mxGetPr(field);
+            }
+        }
+        // Failed by here
+        MEX::error("GNCToolsMEX:createFieldDoubleMatrix","Cannot create double matrix within structure field '%s'", fieldName);
+        return nullptr;
+    }
+
+    mxArray* MEX::createFieldString(mxArray* data, const char* fieldName, const char* str)
+    {
+        if (MEX::isValidStruct(data) && (fieldName != nullptr) && (str != nullptr))
+        { 
+            mxArray* field = mxCreateString(str);
+            if (field != nullptr)
+            {
+                mxSetField(data, 0, fieldName, field);
+                return field;
+            }
+        }
+        // Failed by here
+        MEX::error("GNCToolsMEX:createFieldString","Cannot create string within structure field '%s'", fieldName);
+        return nullptr;
+    }
+
 
     //
     // Data Access
@@ -48,7 +110,7 @@ namespace GNCTools
         {
             return *mxGetPr(data);
         }
-        MEX::error("Does not contain a double scalar");
+        MEX::error("GNCToolsMEX:getDoubleScalar","Does not contain a double scalar");
         return NAN;
     }
 
@@ -70,7 +132,7 @@ namespace GNCTools
             mxGetString(data, strBuf, 2048);
             return std::string(strBuf);
         }
-        MEX::error("Variable does not contain a string variable");
+        MEX::error("GNCToolsMEX:getString","Variable does not contain a string variable");
         return "";
     }
 
@@ -91,17 +153,17 @@ namespace GNCTools
                 }
                 else
                 {
-                    MEX::error("Variable is not a double or logical!");
+                    MEX::error("GNCToolsMEX:getLogicalScalar","Variable is not a double or logical!");
                 }
             }
             else
             {
-                MEX::error("Variable is not scalar!");
+                MEX::error("GNCToolsMEX:getLogicalScalar","Variable is not scalar!");
             }
         }
         else
         {
-            MEX::error("Variable is empty!");        
+            MEX::error("GNCToolsMEX:getLogicalScalar","Variable is empty!");        
         }
         return false;
     }
@@ -113,7 +175,7 @@ namespace GNCTools
             return mxGetField(data, 0, fieldName);
         }
         
-        MEX::error("GNCToolsMEX:FieldError","Cannot access field '%s' in structure", fieldName);
+        MEX::error("GNCToolsMEX:getField","Cannot access field '%s' in structure", fieldName);
         return nullptr;
     }
 
@@ -124,7 +186,7 @@ namespace GNCTools
             return mxGetProperty(data, 0, propertyName);
         }
         
-        MEX::error("GNCToolsMEX:PropError","Cannot access property '%s' in object '%s'", propertyName, className);
+        MEX::error("GNCToolsMEX:getProperty","Cannot access property '%s' in object '%s'", propertyName, className);
         return nullptr;
     }
 
@@ -289,7 +351,7 @@ namespace GNCTools
         {
             if (MEX::isValidField(data, str.c_str()) == false)
             {
-                MEX::error("GNCToolsMEX:StructError","The structure was missing the field '%s', or it was empty", str.c_str());
+                MEX::error("GNCToolsMEX:checkForRequiredFields","The structure was missing the field '%s', or it was empty", str.c_str());
                 return false;
             }
         }
@@ -303,7 +365,7 @@ namespace GNCTools
         {
             if (MEX::isValidProperty(data, className, str.c_str()) == false)
             {
-                MEX::error("GNCToolsMEX:ClassError","The object '%s' was missing the field '%s', or it was empty", className, str.c_str());
+                MEX::error("GNCToolsMEX:checkForRequiredProperties","The object '%s' was missing the field '%s', or it was empty", className, str.c_str());
                 return false;
             }
         }
@@ -328,7 +390,7 @@ namespace GNCTools
         }
         else
         {
-            MEX::error("Cannot check if data contains NaN/Inf, a double argument was not supplied");
+            MEX::error("GNCToolsMEX:containsNaNInf","Cannot check if data contains NaN/Inf, a double argument was not supplied");
             return true;
         }    
     }

@@ -1,10 +1,10 @@
 %% C PID Compilation and Testing
 % J.Currie April 2023
 clc
-clear mxCPID
+clear mxCPID mxPID
 
-mex -v Control/PID/Source/mxCPID.cpp Control/PID/Source/cpid.c Common/Source/mexHelpers.cpp -I.
-movefile('mxCPID.mexw64','Control/PID','f')
+mex -v Control/PID/Source/mxPID.cpp Control/PID/Source/cpid.c Common/Source/mexHelpers.cpp -I. -DCPID
+movefile('mxPID.mexw64','Control/PID/mxCPID.mexw64','f')
 
 %% Unit Tests
 clc
@@ -20,7 +20,7 @@ params.Kp = 2;
 params.Ki = 1.2;
 params.Kd = 1;
 params.Ts = 0.1;
-params.Tf = 0.1;
+params.Tf = 0.15;
 params.c  = 0.1; % D
 params.b  = 1; % K
 params.uMin = -1.5;
@@ -139,3 +139,26 @@ stairs(t, r, 'k--');
 hold off;
 grid on; ylabel('Closed Loop Output [y]');
 xlabel('Time');
+
+%% Check pid2 conversion
+clc
+clf
+params = [];
+params.Kp = 3.5;
+params.Ki = 2;
+params.Kd = 1.5;
+params.Ts = 0.15;
+params.Tf = 0.1;
+params.c  = 0.01;
+params.b  = 1;
+params.uMin = -inf; % note ML pid2 doesn't support limits, only SL
+params.uMax = +inf;
+params.rRampMax = Inf;
+
+mlPID = pid2(params.Kp, params.Ki, params.Kd, params.Tf, params.b, params.c, params.Ts)
+
+mxCPID('Init',mlPID)
+      
+pidOut = mxCPID('getPID')
+
+paramsOut = mxCPID('getParams')

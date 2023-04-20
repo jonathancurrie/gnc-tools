@@ -25,6 +25,7 @@ using namespace GNCTools;
 #define pY      prhs[2]
 #define pU      plhs[0]
 #define pSTAT0  plhs[0]
+#define pOUTP   plhs[0]
 #define pSTAT1  plhs[1]
 #define pROUT   plhs[2]
 
@@ -38,7 +39,7 @@ static PID pid;
 #endif
 
 // Enum of possible commands
-enum class Command {Unknown, Init, Update, GetPID, Reset};
+enum class Command {Unknown, Init, Update, Reset, GetPID, GetParams};
 
 // Local Functions
 Command checkInputs(int nrhs, const mxArray *prhs[]);
@@ -168,7 +169,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             #ifdef CPID
             const cpidData_t pidDataOut = pid; // simply copy
             #else
-            const cpidData_t pidDataOut = pid.getCPIDData();
+            const cpidData_t& pidDataOut = pid.getCPIDData();
             #endif
 
             // Check can be converted, warn if not (allows linear analysis)
@@ -178,7 +179,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             if (std::isinf(pidDataOut.rRampMax) == false)
             {
-                MEX::warning("GNCToolsMEX:mxPID:uSatpid2","MATLAB's pid2 controller does not support setpoint ramping, dropping from specification.");
+                MEX::warning("GNCToolsMEX:mxPID:rRamppid2","MATLAB's pid2 controller does not support setpoint ramping, dropping from specification.");
             }
             
             // Create pid2 args
@@ -192,6 +193,34 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             pid2args[6] = MEX::createDoubleScalar(pidDataOut.Ts);
             // Create return object
             mexCallMATLAB(1, plhs, 7, pid2args, "pid2");
+            break;
+        }
+        case Command::GetParams:
+        {
+            // Ensure the controller is initialized first
+            checkInitialized();
+
+            // Get parameter structure
+            #ifdef CPID
+            const cpidData_t pidDataOut = pid; // simply copy
+            #else
+            const cpidData_t& pidDataOut = pid.getCPIDData();
+            #endif
+
+            // Create output structure
+            const char* paramNames[] = {"Kp","Ki","Kd","Tf","Ts","uMin","uMax","b","c","rRampMax"};
+            pOUTP = MEX::createStruct(paramNames, 10);
+            // Assign args
+            MEX::createFieldDoubleScalar(pOUTP, "Kp", pidDataOut.Kp);
+            MEX::createFieldDoubleScalar(pOUTP, "Ki", pidDataOut.Ki);
+            MEX::createFieldDoubleScalar(pOUTP, "Kd", pidDataOut.Kd);
+            MEX::createFieldDoubleScalar(pOUTP, "Tf", pidDataOut.Tf);
+            MEX::createFieldDoubleScalar(pOUTP, "Ts", pidDataOut.Ts);
+            MEX::createFieldDoubleScalar(pOUTP, "uMin", pidDataOut.uMin);
+            MEX::createFieldDoubleScalar(pOUTP, "uMax", pidDataOut.uMax);
+            MEX::createFieldDoubleScalar(pOUTP, "b", pidDataOut.b);
+            MEX::createFieldDoubleScalar(pOUTP, "c", pidDataOut.c);
+            MEX::createFieldDoubleScalar(pOUTP, "rRampMax", pidDataOut.rRampMax);
             break;
         }
         case Command::Reset:
@@ -210,7 +239,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         default:
         {
-            MEX::error("Unknown user command!");
+            MEX::error("GNCToolsMEX:mxPID", "Unknown user command!");
             break;
         }
     }
@@ -236,7 +265,7 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
         // Check parameters structure
         if (nrhs < 2)
         {
-            MEX::error("You must supply a parameters structure as the second argument when calling 'init'");
+            MEX::error("GNCToolsMEX:mxPID", "You must supply a parameters structure as the second argument when calling 'init'");
         }
         if (MEX::isValidStruct(pPARAMS))
         {
@@ -248,7 +277,7 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
         }
         else
         {
-            MEX::error("The parameters argument must be a valid structure or pid2 object.");
+            MEX::error("GNCToolsMEX:mxPID", "The parameters argument must be a valid structure or pid2 object.");
         }
         return Command::Init;
     }
@@ -257,18 +286,22 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
         // Check r, y
         if (nrhs < 3)
         {
-            MEX::error("You must supply both r (setpoint) and y (plant measurement) when calling 'update'");
+            MEX::error("GNCToolsMEX:mxPID", "You must supply both r (setpoint) and y (plant measurement) when calling 'update'");
         }
 
         return Command::Update;
+    }    
+    else if (commandStr == "reset")
+    {
+        return Command::Reset;
     }
     else if (commandStr == "getpid")
     {
         return Command::GetPID;
     }
-    else if (commandStr == "reset")
+    else if (commandStr == "getparams")
     {
-        return Command::Reset;
+        return Command::GetParams;
     }
     else
     {

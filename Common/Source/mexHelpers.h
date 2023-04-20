@@ -26,8 +26,13 @@ class MEX
     public:
         // Data Creation
         static mxArray* createDoubleScalar(double val = 0.0) noexcept;
+        static mxArray* createDoubleMatrix(size_t nrow, size_t ncol) noexcept;
         static mxArray* createUInt8(uint8_t val = 0) noexcept;
         static mxArray* createInt8(int8_t val = 0) noexcept;
+        static mxArray* createStruct(const char* fieldNames[], int numFields);
+        static double* createFieldDoubleScalar(mxArray* data, const char* fieldName, double val = 0.0);
+        static double* createFieldDoubleMatrix(mxArray* data, const char* fieldName, size_t nrow, size_t ncol);
+        static mxArray* createFieldString(mxArray* data, const char* fieldName, const char* str);
 
         // Data Access
         static double getDoubleScalar(const mxArray* data);
