@@ -267,11 +267,59 @@ hold off; grid on;
 ylabel('Control Input [u]');
 xlabel('Time [s]');
 
-
-%% PID Tuning
+%% PID Tuning: FOPDT True Plant Model
 clc
-Gz = c2d(Gs, Ts);
-mlPID = pidtune(Gz,'PIDF2',1.5)
+clf
+
+% Example slightly underdamped second order system
+Gs_true = tf(1.2, [0.5 0.5 0.2]);
+step(Gs_true)
+
+% Constants
+Ts = 0.1;
+tFinal = 60;
+
+%% PID Tuning: FOPDT Data Gen
+clc
+% Actual plant we will model, discrete
+Gz_true = c2d(Gs_true, Ts);
+
+% Generate some sample "measurement data"
+t = 0:Ts:tFinal;
+ustep = ones(size(t)); n = length(ustep);
+ustep(ceil(n/2):end) = -0.5;
+rng('default'); % Same seed each run, just for Wiki examples
+ymeas = lsim(Gz_true,ustep,t) + sqrt(0.01) * randn(n,1);
+
+% Manual Plot
+subplot(211)
+plot(t,ymeas,'.-');
+grid on;
+ylabel('Plant Output [y]');
+title('Sample Plant Data from Step Tests');
+
+subplot(212);
+stairs(t,ustep,'.-');
+grid on;
+ylabel('Plant Input [u]');
+xlabel('Time [s]');
+
+%% PID Tuning: FOPDT Fit
+clc
+clf
+% Fit Guesses 
+K0 = 6;
+theta0 = 0.5;
+tau0 = 2.75 - theta0;
+
+% Note requires OPTI Toolbox: https://www.controlengineering.co.nz/Wikis/OPTI/
+Gs_fit = fitFOPDT(t,ustep,ymeas,K0,tau0,theta0,'FOPDT Fit')
+
+%% PID Tuning: FOPDT with ML PID Tuner for 2DOF-PID
+clc
+Gz_fit = c2d(Gs_fit, Ts);
+Wc = 1; % Crossover frequency
+mlPID = pidtune(Gz_fit,'PIDF2',1)
 uMin = -Inf;
 uMax = +Inf;
 rRampMax = +Inf;
@@ -279,7 +327,78 @@ noiseVar = 0.0;
 
 pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
 [t,r] = makeTimeSetpoint(Ts,tFinal);
-[u,y,rOut] = simPID(Gs, pidParams, t, r, noiseVar, 'PIDTuner Tuned');
+[u_fo,y_fo,rOut] = simPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling FOPDT Model');
+
+%% Sim on real plant (magic of simulation)
+clc
+[u,y,rOut] = simPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
+
+%% PID Tuning: SOPDT True Plant Model
+clc
+clf
+
+% Example quite underdamped second order system with dead time
+Gs_true = tf(0.5, [0.5 0.2 0.2],'IODelay',0.35);
+step(Gs_true)
+
+% Constants
+Ts = 0.1;
+tFinal = 60;
+
+%% PID Tuning: SOPDT Data Gen
+clc
+% Actual plant we will model, discrete
+Gz_true = c2d(Gs_true, Ts);
+
+% Generate some sample "measurement data"
+t = 0:Ts:tFinal;
+ustep = ones(size(t)); n = length(ustep);
+ustep(ceil(n/2):end) = -0.5;
+rng('default'); % Same seed each run, just for Wiki examples
+ymeas = lsim(Gz_true,ustep,t) + sqrt(0.01) * randn(n,1);
+
+% Manual Plot
+subplot(211)
+plot(t,ymeas,'.-');
+grid on;
+ylabel('Plant Output [y]');
+title('Sample Plant Data from Step Tests');
+
+subplot(212);
+stairs(t,ustep,'.-');
+grid on;
+ylabel('Plant Input [u]');
+xlabel('Time [s]');
+
+%% PID Tuning: SOPDT Fit
+clc
+clf
+% Fit Guesses 
+K0 = 2.5;
+wn0 = 1;
+zeta0 = 0.5;
+theta0 = 0.3;
+
+% Note requires OPTI Toolbox: https://www.controlengineering.co.nz/Wikis/OPTI/
+[Gs_fit,K,wn,zeta,theta] = fitSOPDT(t,ustep,ymeas,K0,wn0,zeta0,theta0,'SOPDT Fit')
+
+%% PID Tuning: SOPDT with ML PID Tuner for 2DOF-PID
+clc
+Gz_fit = c2d(Gs_fit, Ts);
+Wc = 1.3; % Crossover frequency
+mlPID = pidtune(Gz_fit,'PIDF2',Wc)
+uMin = -Inf;
+uMax = +Inf;
+rRampMax = +Inf;
+noiseVar = 0.0;
+
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_fo,y_fo] = simPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling SOPDT Model');
+
+%% Sim on real plant (magic of simulation)
+clc
+[u,y,rOut] = simPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
 
 
 %% Stability Analysis
@@ -316,6 +435,10 @@ rng('default');
 % Discretize Plant
 Gz = c2d(Gs, params.Ts);
 Gzss = ss(Gz);
+% Ensure delays within states
+if (Gzss.InputDelay ~= 0 || Gzss.OutputDelay ~= 0)
+    Gzss = delay2z(Gzss);
+end
 
 % Init Controller
 if (mxCPID('init',params) ~= 0)
@@ -397,4 +520,85 @@ r(1:idx) = 0;
 [~,idx] = min(abs(t - tFinal8*5));
 r(idx:end) = 0;
 
+end
+
+function [Gs_fit,K,tau,theta,yfit] = fitFOPDT(t, u, y, K0, tau0, theta0, plotTitle)
+
+if (nargin < 7), plotTitle = []; end
+
+% Initial guess & bounds
+x0 = [K0, tau0, theta0];
+lb = [-Inf, 0, 0];
+ub = [Inf, Inf, Inf];
+y = y(:); % Ensure column
+
+    % Local FOPDT model build
+    function Gs = buildFOPDT(K,tau,theta)
+        s = tf('s');
+        Gs = (K * exp(-theta*s)) / (tau*s + 1);
+    end
+
+    % Local objective function
+    function [yfit,Gs] = objective(x0)
+        Gs = buildFOPDT(x0(1), x0(2), x0(3));
+        yfit = lsim(Gs,u,t);
+    end
+
+% Use OPTI to solve
+x = opti_mkltrnls(@objective, [], x0, y, lb, ub);
+K = x(1);
+tau = x(2);
+theta = x(3);
+[yfit,Gs_fit] = objective(x);
+
+if (~isempty(plotTitle))
+    % Plot
+    plot(t,y,'.-',t,yfit);
+    grid on;
+    ylabel('Plant Output [y]');
+    xlabel('Time [s]');
+    legend('Measured Data','FOPDT Fit');
+    title(plotTitle);
+end
+end
+
+function [Gs_fit,K,wn,zeta,theta,yfit] = fitSOPDT(t, u, y, K0, wn0, zeta0, theta0, plotTitle)
+
+if (nargin < 8), plotTitle = []; end
+
+% Initial guess & bounds
+x0 = [K0, wn0, zeta0, theta0];
+lb = [-Inf, 0, 0, 0];
+ub = [Inf, Inf, Inf, Inf];
+y = y(:); % Ensure column
+
+    % Local SOPDT model build
+    function Gs = buildSOPDT(K, wn,zeta,theta)
+        s = tf('s');
+        Gs = (K * exp(-theta*s) * wn^2) / (s^2 + 2*zeta*wn*s + wn^2);
+    end
+
+    % Local objective function
+    function [yfit,Gs] = objective(x0)
+        Gs = buildSOPDT(x0(1), x0(2), x0(3), x0(4));
+        yfit = lsim(Gs,u,t);
+    end
+
+% Use OPTI to solve
+x = opti_mkltrnls(@objective, [], x0, y, lb, ub);
+K = x(1);
+wn = x(2);
+zeta = x(3);
+theta = x(4);
+[yfit,Gs_fit] = objective(x);
+
+if (~isempty(plotTitle))
+    % Plot
+    plot(t,y,'.-',t,yfit);
+    grid on;
+    ylabel('Plant Output [y]');
+    xlabel('Time [s]');
+    legend('Measured Data','SOPDT Fit');
+    title(plotTitle);
+end
 end
