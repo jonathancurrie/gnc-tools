@@ -34,7 +34,7 @@ typedef double real_t;  //!< Floating point real number
 // Constant Definitions
 #define CFILTER_SUCCESS 0   //!< Success return code
 #define CFILTER_FAILURE -1  //!< Failure return code (may be summed)
-#define CFILTER_MAXORDER 12  //!< Maximum order of filter (statically allocated memory)
+#define CFILTER_MAXORDER 6  //!< Maximum order of filter (statically allocated memory)
 
 /**
  * @brief Contains C Filter coefficients and internal state
