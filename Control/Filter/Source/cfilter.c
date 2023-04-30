@@ -119,10 +119,10 @@ int8_t cfilterInit(cfilterData_t* filter, const real_t* num, uint8_t lenNum,
     }
 
     // Ensure a[0] == 1
-    /*if (den[0] != (real_t)1.0)
+    if (den[0] != (real_t)1.0)
     {
         return CFILTER_FAILURE;
-    }*/
+    }
 
     // Check coefficients for Inf/NaN
     uint8_t retCode = CFILTER_SUCCESS;
