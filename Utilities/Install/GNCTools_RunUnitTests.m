@@ -6,14 +6,11 @@ k = 1;
 
 % Control
 testFolders{k} = 'Control/PID/Tests'; k = k + 1;
+testFolders{k} = 'Control/Filter/Tests'; k = k + 1;
 
 % Navigation
 
 % Guidance
-
-% Signal Processing
-
-
 
 % Now Run
 output = runtests(testFolders,'OutputDetail',3);
