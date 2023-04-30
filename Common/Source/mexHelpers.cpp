@@ -114,6 +114,16 @@ namespace GNCTools
         return NAN;
     }
 
+    double* MEX::getDoubleVector(const mxArray* data)
+    {
+        if (MEX::isDoubleVector(data))
+        {
+            return mxGetPr(data);
+        }
+        MEX::error("GNCToolsMEX:getDoubleVector","Does not contain a double vector");
+        return nullptr;
+    }
+
     double MEX::getDoubleScalarField(const mxArray* data, const char* field)
     {
         return MEX::getDoubleScalar(MEX::getField(data, field));
@@ -203,7 +213,7 @@ namespace GNCTools
     {
         if (MEX::isEmpty(data) == false)
         {
-            return mxGetN(data); 
+            return mxGetM(data); 
         }
         return 0;
     }
@@ -212,7 +222,7 @@ namespace GNCTools
     {
         if (MEX::isEmpty(data) == false)
         {
-            return mxGetM(data); 
+            return mxGetN(data); 
         }
         return 0;
     }
