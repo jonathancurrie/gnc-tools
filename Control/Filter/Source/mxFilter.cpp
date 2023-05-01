@@ -76,8 +76,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             #else
             // Save C arrays into C++ vectors
-            std::vector<double> numVec(std::begin(num), std::end(num+lenNum-1));
-            std::vector<double> denVec(std::begin(den), std::end(den+lenDen-1));
+            std::vector<double> numVec(num, num + lenNum);
+            std::vector<double> denVec(den, den + lenDen);
 
             // Call constructor
             filter = Filter(numVec, denVec);
@@ -121,7 +121,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 #ifdef CFILTER
                 statusSum += cfilterUpdate(&filter, u[i], &y[i]);
                 #else
-                statusSum += filter.update(u[i], &y[i]);
+                statusSum += filter.update(u[i], y[i]);
                 #endif
             }
 

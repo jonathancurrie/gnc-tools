@@ -7,12 +7,11 @@ classdef mxFilter_tests < matlab.unittest.TestCase
     properties(Constant)
         absTol = 1e-12;       
         Fs = 100; % Sampling frequency [Hz]
-        maxOrderC = 6;
-        maxOrderCpp = 1024;
+        maxOrder = 6;
     end
 
     properties(TestParameter)
-        filterFcn = {@mxCFilter};
+        filterFcn = {@mxCFilter,@mxFilter};
     end
 
     methods(Test)
@@ -44,16 +43,8 @@ classdef mxFilter_tests < matlab.unittest.TestCase
             testCase.verifyEqual(int8(-1), filterFcn('init',1,[1 NaN]));
 
             % Greater than max order
-            switch(lower(func2str(filterFcn)))
-                case 'mxcfilter'
-                    testCase.verifyEqual(int8(-1), filterFcn('init',ones(mxFilter_tests.maxOrderC+2,1),1));
-                    testCase.verifyEqual(int8(-1), filterFcn('init',1,ones(mxFilter_tests.maxOrderC+2,1)));    
-                case 'mxfilter'
-                    testCase.verifyEqual(int8(-1), filterFcn('init',ones(mxFilter_tests.maxOrderCpp+2,1),1));
-                    testCase.verifyEqual(int8(-1), filterFcn('init',1,ones(mxFilter_tests.maxOrderCpp+2,1)));    
-                otherwise
-                    error('unknown function')
-            end
+            testCase.verifyEqual(int8(-1), filterFcn('init',ones(mxFilter_tests.maxOrder+2,1),1));
+            testCase.verifyEqual(int8(-1), filterFcn('init',1,ones(mxFilter_tests.maxOrder+2,1)));    
         end
 
         function CheckUpdate(testCase, filterFcn)
