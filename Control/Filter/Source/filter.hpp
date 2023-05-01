@@ -50,7 +50,10 @@ class FilterParams
         std::vector<double> den{};  //!< Denominator Coefficients
 };
 
-
+/**
+ * @brief A C++ wrapper around the C Filter
+ * 
+ */
 class Filter
 {
     public:

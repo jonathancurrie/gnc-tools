@@ -42,14 +42,14 @@ int8_t cfilterUpdate(cfilterData_t* filter, real_t u, real_t* y)
     // Note these operations could be done with less code (and more efficiently), 
     // but it is written explicitly here for understanding.
     int8_t i = 0;    
-    // y[k] = b[0]*u[k] + b[1]*u[k-1] + b[2]*u[k-2] + ...
+    // num = b[0]*u[k] + b[1]*u[k-1] + b[2]*u[k-2] + ...
     // with uShift = (u[k-1], u[k-2], ...)
     real_t yNum = filter->num[0] * u;    
     for (i = 1; i < filter->lenNum; i++)
     {
         yNum += filter->num[i] * filter->uShift[i-1];
     }
-    // y[k] = y[k] - a[1]*y[k-1] - a[2]*y[k-2] - ...
+    // den = a[1]*y[k-1] + a[2]*y[k-2] + ...
     // with yShift = (y[k-1], y[k-2], ...)
     real_t yDen = (real_t)0.0;
     for (i = 1; i < filter->lenDen; i++)
@@ -58,6 +58,7 @@ int8_t cfilterUpdate(cfilterData_t* filter, real_t u, real_t* y)
     }
     // We keep separate numerator and denominator sums for numerical accuracy
     // until this final difference.
+    // a[0]*y = num - den
     *y = yNum - yDen;
 
     // Update shift registers

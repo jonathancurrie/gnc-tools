@@ -220,6 +220,6 @@ void checkInitialized(void)
     if (filter.isInitialized() == false)
     #endif
     {
-        MEX::error("GNCToolsMEX:mxFilter","You must initialize the filter first using %s('Init',params)!",mexFunctionName());
+        MEX::error("GNCToolsMEX:mxFilter","You must initialize the filter first using %s('Init',num,den)!",mexFunctionName());
     }
 }

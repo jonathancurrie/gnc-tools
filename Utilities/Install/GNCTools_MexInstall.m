@@ -16,7 +16,11 @@ fprintf('GNCTools MEX FILE INSTALL\n\n');
 % Files to Compile
 files{1} = {{'mxPID','mxCPID'},'Control/PID','cpid.c','CPID'};
 files{2} = {'mxPID','Control/PID',{'pid.cpp','cpid.c'}};
-files{3} = {'vc19MexCheck','Utilities/Install'};
+files{3} = {{'mxFilter','mxCFilter'},'Control/Filter','cfilter.c','CFILTER'};
+files{4} = {'mxFilter','Control/Filter',{'filter.cpp','cfilter.c'}};
+files{5} = {{'mxSOSFilter','mxCSOSFilter'},'Control/Filter','csosFilter.c','CSOSFILTER'};
+files{6} = {'mxSOSFilter','Control/Filter',{'sosFilter.cpp','csosFilter.c'}};
+files{end+1} = {'vc19MexCheck','Utilities/Install'};
 
 % Additional Source
 postSrc = ' Common/Source/mexHelpers.cpp';
