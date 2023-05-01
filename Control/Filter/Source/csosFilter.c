@@ -123,7 +123,7 @@ int8_t csosFilterInit(csosFilterData_t* filter, const real_t* sosMatrix,
     {
         return CSOSFILTER_FAILURE;
     }
-    if (numSections == 0)
+    if ((numSections == 0) || (numGains == 0))
     {
         return CSOSFILTER_FAILURE;
     }
