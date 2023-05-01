@@ -106,6 +106,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             
             #ifdef CPID
             // Call init
+            initCalled = false;
             *status = cpidInit(&pid, Kp, Ki, Kd, Tf, Ts, uMin, uMax, b, c, rRampMax);
             if (*status == CPID_SUCCESS)
             {

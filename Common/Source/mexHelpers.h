@@ -36,6 +36,7 @@ class MEX
 
         // Data Access
         static double getDoubleScalar(const mxArray* data);
+        static double* getDoubleVector(const mxArray* data);
         static double getDoubleScalarField(const mxArray* data, const char* field);
         static double getDoubleScalarProperty(const mxArray* data, const char* className, const char* property);
         static std::string getString(const mxArray* data);
