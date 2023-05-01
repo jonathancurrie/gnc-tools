@@ -66,7 +66,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             uint8_t numGains = static_cast<uint8_t>(MEX::getNumElem(pGAIN));
 
             // MATLAB is column ordered, C/C++ is row ordered, need to transpose sosMatrix
-            // Allocate a new Matrix the right size, then fill in from original
+            // Allocate a new Matrix the right size, then fill in from original while transposing
             mxArray* mlSOSMatrixT = MEX::createDoubleMatrix(CSOSFILTER_COEFFSPERSECTION, numSections);
             double* sosMatrixT = mxGetPr(mlSOSMatrixT);
             double *sosMatrixIn = mxGetPr(pMATRIX);
@@ -88,11 +88,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             #else
             // Save C arrays into C++ vectors
-            std::vector<double> numVec(num, num + lenNum);
-            std::vector<double> denVec(den, den + lenDen);
+            std::vector<std::vector<double>> sosMatrixVecVec(numSections);
+            for (uint8_t i = 0; i < numSections; i++)
+            {
+                int idx = i*CSOSFILTER_COEFFSPERSECTION;
+                sosMatrixVecVec[i] = std::vector<double>(&sosMatrixT[idx], &sosMatrixT[idx] + CSOSFILTER_COEFFSPERSECTION);
+            }            
+            std::vector<double> gainVec(sosGain, sosGain + numGains);
 
             // Call constructor
-            filter = Filter(numVec, denVec);
+            filter = SOSFilter(sosMatrixVecVec, gainVec);
             if (filter.isInitialized())
             {
                 *status = CSOSFILTER_SUCCESS;
