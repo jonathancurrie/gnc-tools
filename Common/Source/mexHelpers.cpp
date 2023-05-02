@@ -315,7 +315,7 @@ namespace GNCTools
     {
         if (data != nullptr)
         {
-            return mxIsStruct(data) && (mxIsEmpty(data) == false);
+            return (mxIsEmpty(data) == false) && mxIsStruct(data);
         }
         return false;
     }
@@ -335,7 +335,7 @@ namespace GNCTools
 
     bool MEX::isValidClass(const mxArray* data, const char* className) noexcept
     {
-        if ((data != nullptr) && (className != nullptr))
+        if ((data != nullptr) && (mxIsEmpty(data) == false) && (className != nullptr))
         {
             return mxIsClass(data, className);
         }

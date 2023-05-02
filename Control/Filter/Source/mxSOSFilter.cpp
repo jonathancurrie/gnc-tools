@@ -61,15 +61,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             int8_t* status = static_cast<int8_t*>(mxGetData(pSTAT0));
             
             // Get inputs
-            double* sosGain = mxGetPr(pGAIN);
-            uint8_t numSections = static_cast<uint8_t>(MEX::getNumRows(pMATRIX));
-            uint8_t numGains = static_cast<uint8_t>(MEX::getNumElem(pGAIN));
+            mxArray* psosMatrix = nullptr;
+            mxArray* psosGain = nullptr;
+            if (MEX::isValidClass(pMATRIX, "dfilt.df2sos"))
+            {
+                psosMatrix = MEX::getProperty(pMATRIX, "dfilt.df2sos", "sosMatrix");
+                psosGain = MEX::getProperty(pMATRIX, "dfilt.df2sos", "ScaleValues");
+            }
+            else if (MEX::isValidStruct(pMATRIX))
+            {
+                psosMatrix = MEX::getField(pMATRIX, "SOSMatrix");
+                psosGain = MEX::getField(pMATRIX, "ScaleValues");
+            }
+            else
+            {
+                psosMatrix = const_cast<mxArray*>(pMATRIX);
+                psosGain = const_cast<mxArray*>(pGAIN);
+            }
+            double* sosGain = mxGetPr(psosGain);
+            uint8_t numSections = static_cast<uint8_t>(MEX::getNumRows(psosMatrix));
+            uint8_t numGains = static_cast<uint8_t>(MEX::getNumElem(psosGain));
 
             // MATLAB is column ordered, C/C++ is row ordered, need to transpose sosMatrix
             // Allocate a new Matrix the right size, then fill in from original while transposing
             mxArray* mlSOSMatrixT = MEX::createDoubleMatrix(CSOSFILTER_COEFFSPERSECTION, numSections);
             double* sosMatrixT = mxGetPr(mlSOSMatrixT);
-            double *sosMatrixIn = mxGetPr(pMATRIX);
+            double *sosMatrixIn = mxGetPr(psosMatrix);
             for (uint8_t i = 0; i < numSections; i++)
             {
                 for (uint8_t j = 0; j < CSOSFILTER_COEFFSPERSECTION; j++)
@@ -181,9 +198,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //
 Command checkInputs(int nrhs, const mxArray *prhs[])
 {
+    const char* mexName = mexFunctionName();
     if (nrhs < 1)
-    {
-        const char* mexName = mexFunctionName();
+    {        
         MEX::error("GNCToolsMEX:mxSOSFilter", "Usage: %s('Init',sosMatrix,sosGain), y = %s('Update',u), or %s('Reset')", mexName, mexName, mexName);
     }
     
@@ -192,23 +209,59 @@ Command checkInputs(int nrhs, const mxArray *prhs[])
     commandStr = Utils::toLower(commandStr);
     if (commandStr == "init")
     {
+        mxArray* sosMatrix = nullptr;
+        mxArray* sosGain = nullptr;
+
         // Check input args
-        if (nrhs < 3)
+        if (nrhs == 1)
         {
-            MEX::error("GNCToolsMEX:mxSOSFilter", "You must supply both the sosMatrix and sosGain when calling init!");
+            MEX::error("GNCToolsMEX:mxSOSFilter", "Usage: %s('Init',sosMatrix,sosGain), %s('Init',df2sosObject), or %s('Init',coeffStruct)", mexName, mexName, mexName);
         }
-        if ((MEX::isDoubleMatrix(pMATRIX) == false) && (MEX::isDoubleVector(pMATRIX) == false))
+        else if (nrhs == 2)
+        {
+            // Second argument could be coeffs struct or df2sos object
+            if (MEX::isValidClass(pMATRIX, "dfilt.df2sos"))
+            {                
+                sosMatrix = MEX::getProperty(pMATRIX, "dfilt.df2sos", "sosMatrix");
+                sosGain = MEX::getProperty(pMATRIX, "dfilt.df2sos", "ScaleValues");                   
+            }
+            else if (MEX::isValidStruct(pMATRIX))
+            {
+                sosMatrix = MEX::getField(pMATRIX, "SOSMatrix");
+                sosGain = MEX::getField(pMATRIX, "ScaleValues");
+            }            
+            else
+            {
+                MEX::error("GNCToolsMEX:mxSOSFilter", "When calling init with a single argument, it must be a df2sos object or structure containing the SOSMatrix and ScaleValues!");
+            }            
+        }
+        else
+        {
+            // sosMatrix, sosGain supplied independently
+            // Naughty const cast so we can assign from rhs or fields
+            sosMatrix = const_cast<mxArray*>(pMATRIX);
+            sosGain = const_cast<mxArray*>(pGAIN);
+        }     
+
+        if (sosMatrix == nullptr || sosGain == nullptr)
+        {
+            MEX::error("GNCToolsMEX:mxSOSFilter", "Fatal error, sosMatrix or sosGain mxArray* was nullptr?");
+        }
+
+        // Check sizes
+        if ((MEX::isDoubleMatrix(sosMatrix) == false) && (MEX::isDoubleVector(sosMatrix) == false))
         {
             MEX::error("GNCToolsMEX:mxSOSFilter", "The sosMatrix must be a double matrix or vector.");
         }
-        if (MEX::getNumCols(pMATRIX) != CSOSFILTER_COEFFSPERSECTION)
+        if (MEX::getNumCols(sosMatrix) != CSOSFILTER_COEFFSPERSECTION)
         {
             MEX::error("GNCToolsMEX:mxSOSFilter", "The sosMatrix must contain %d columns.", CSOSFILTER_COEFFSPERSECTION);
         }
-        if ((MEX::isDoubleVector(pGAIN) == false) && (MEX::isDoubleScalar(pGAIN) == false))
+        if ((MEX::isDoubleVector(sosGain) == false) && (MEX::isDoubleScalar(sosGain) == false))
         {
             MEX::error("GNCToolsMEX:mxSOSFilter", "The sosGain must be a double vector or scalar.");
         }
+
         return Command::Init;
     }
     else if (commandStr == "update")
