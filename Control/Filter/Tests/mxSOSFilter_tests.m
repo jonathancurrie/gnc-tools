@@ -32,7 +32,7 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             testCase.verifyError(@() filterFcn('init',ones(1,6),[]),'GNCToolsMEX:mxSOSFilter');
 
             % Not 6 coeffs
-            testCase.verifyError(@() filterFcn('init',ones(1,5),1),'GNCToolsMEX:mxSOSFilter');
+            testCase.verifyError(@() filterFcn('init',ones(1,5),1),'GNCToolsMEX:mxSOSFilter');           
 
             % nrows matrix != numel gain
             testCase.verifyEqual(int8(-1), filterFcn('init',ones(1,6), [1 1 1]));
@@ -74,7 +74,19 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             end
 
             % Greater than max number sections
-            testCase.verifyEqual(int8(-1), filterFcn('init',ones(mxSOSFilter_tests.maxSections+1,6),ones(mxSOSFilter_tests.maxSections+1,1)));   
+            testCase.verifyEqual(int8(-1), filterFcn('init',ones(mxSOSFilter_tests.maxSections+1,6),ones(mxSOSFilter_tests.maxSections+1,1)));  
+
+            % dfilt.df2sos constructor
+            [c,Hd] = mxSOSFilter_tests.makeIIRLPF(2);
+            testCase.verifyEqual(int8(0), filterFcn('init',Hd));
+
+            % struct constructor
+            testCase.verifyEqual(int8(0), filterFcn('init',c));
+            testCase.verifyError(@() filterFcn('init',struct()),'GNCToolsMEX:getField');
+            testCase.verifyError(@() filterFcn('init',struct('SOSMatrix',[])),'GNCToolsMEX:getField');
+            testCase.verifyError(@() filterFcn('init',struct('ScaleValues',[])),'GNCToolsMEX:getField');
+            testCase.verifyError(@() filterFcn('init',struct('SOSMatrix',[],'ScaleValues',[])),'GNCToolsMEX:getField');
+            testCase.verifyError(@() filterFcn('init',struct('SOSMatrix',1,'ScaleValues',1)),'GNCToolsMEX:mxSOSFilter');
         end
 
         function CheckUpdate(testCase, filterFcn)
@@ -226,7 +238,7 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             c.ScaleValues = ones(1,N);
         end
 
-        function c = makeIIRLPF(N)
+        function [c,Hd] = makeIIRLPF(N)
             Fc = 3;  % Cutoff Frequency
             
             % Construct an FDESIGN object and call its BUTTER method.
@@ -235,7 +247,7 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             c = Hd.coeffs;
         end
 
-        function c = makeIIRHPF(N)
+        function [c,Hd] = makeIIRHPF(N)
             Fc = 3;  % Cutoff Frequency
             
             % Construct an FDESIGN object and call its BUTTER method.
@@ -244,7 +256,7 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             c = Hd.coeffs;
         end
 
-        function c = makeIIRNotch(N)
+        function [c,Hd] = makeIIRNotch(N)
             Fc1 = 0.8;  % First Cutoff Frequency
             Fc2 = 1.25;  % Second Cutoff Frequency
             h  = fdesign.bandstop('N,F3dB1,F3dB2', N, Fc1, Fc2, mxSOSFilter_tests.Fs);
@@ -269,7 +281,7 @@ classdef mxSOSFilter_tests < matlab.unittest.TestCase
             u = sin(fInputHz*2*pi*t);
 
             % Init Filter
-            status = filterFcn('Init',coeffs.SOSMatrix,coeffs.ScaleValues);
+            status = filterFcn('Init',coeffs);
             if (status ~= int8(0))
                 error("Error initializing filter");
             end

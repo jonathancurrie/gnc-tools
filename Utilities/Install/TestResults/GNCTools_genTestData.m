@@ -3,6 +3,7 @@ clc
 clear all
 
 %% PID Data
+clc
 Gs = tf(1.2, [0.5 0.3 0.2]);
 
 % Constants
@@ -56,4 +57,70 @@ pidData.cu(n) = mxCPID('update', pidData.r(n), pidData.y(n));
 pidData.cppu(n) = mxPID('update', pidData.r(n), pidData.y(n));
 
 % Save to .mat
-save pidData pidData
+save Utilities/Install/TestResults/pidData pidData
+
+%% Filter Data
+clc
+
+% Design Notch
+Ts  = 0.01;
+N   = 4;     % Order
+Fc1 = 0.8;  % First Cutoff Frequency
+Fc2 = 1.25;  % Second Cutoff Frequency
+h  = fdesign.bandstop('N,F3dB1,F3dB2', N, Fc1, Fc2, 1/Ts);
+Hd = design(h, 'butter');
+[b,a] = tf(Hd);
+
+filterData.num = b;
+filterData.den = a;
+filterData.u = sin(1*2*pi*(0:Ts:2));
+
+% Init Filters
+if (mxCFilter('init',b,a) ~= 0)
+    error('Error initializing CFilter!');
+end
+if (mxFilter('init',b,a) ~= 0)
+    error('Error initializing Filter!');
+end
+
+% Compute Output
+[filterData.cy,cstatus] = mxCFilter('update',filterData.u);
+[filterData.cppy,cppstatus] = mxFilter('update',filterData.u);
+
+if (cstatus ~= 0 || cppstatus ~= 0)
+    error('Error updating filter(s)');
+end
+
+save Utilities/Install/TestResults/filterData.mat filterData
+
+%% SOS Filter Data
+clc
+
+% Design Notch
+Ts  = 0.01;
+N   = 4;     % Order
+Fc1 = 0.8;  % First Cutoff Frequency
+Fc2 = 1.25;  % Second Cutoff Frequency
+h  = fdesign.bandstop('N,F3dB1,F3dB2', N, Fc1, Fc2, 1/Ts);
+Hd = design(h, 'butter');
+
+filterData.coeffs = Hd.coeffs;
+filterData.u = sin(1*2*pi*(0:Ts:2));
+
+% Init Filters
+if (mxCSOSFilter('init',filterData.coeffs) ~= 0)
+    error('Error initializing CFilter!');
+end
+if (mxSOSFilter('init',filterData.coeffs) ~= 0)
+    error('Error initializing Filter!');
+end
+
+% Compute Output
+[filterData.cy,cstatus] = mxCSOSFilter('update',filterData.u);
+[filterData.cppy,cppstatus] = mxSOSFilter('update',filterData.u);
+
+if (cstatus ~= 0 || cppstatus ~= 0)
+    error('Error updating filter(s)');
+end
+
+save Utilities/Install/TestResults/sosFilterData.mat filterData
