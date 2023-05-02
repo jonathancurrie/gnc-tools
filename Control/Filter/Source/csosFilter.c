@@ -79,9 +79,9 @@ int8_t secondOrderIIRFilter(const real_t* sosNum, const real_t* sosDen, real_t g
 
     // Unroll for-loops explicitly as we know the order
     real_t u = *inOut;
-    // num = b[0]*u[k] + b[1]*u[k-1] + b[2]*u[k-2] + ...
+    // num = b[0]*u[k] + b[1]*u[k-1] + b[2]*u[k-2]
     real_t yNum = sosNum[0]*u + sosNum[1]*uShift[0] + sosNum[2]*uShift[1];
-    // den = a[1]*y[k-1] + a[2]*y[k-2] + ...
+    // den = a[1]*y[k-1] + a[2]*y[k-2]
     real_t yDen = sosDen[1]*yShift[0] + sosDen[2]*yShift[1];
     // a[0]*y = num - den
     real_t y = yNum - yDen;
