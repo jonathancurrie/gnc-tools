@@ -4,6 +4,33 @@
  * @date 01-May-2023
  * @brief Discrete Second Order Section Filter Implementation.
  * 
+ * Difference Equation per Section:
+ * y[k] = b[0]*u[k] + b[1]*u[k-1] + b[2]*u[k-2] + ... - a[1]*y[k-1] - a[2]*y[k-2] - ...
+ * 
+ * where y is the section output, u is the section input. Each section is
+ * cascaded to form an overall filter in 'Direct-Form II, Second-Order Sections'
+ * format. 
+ * 
+ * The sosMatrix is expected in the following row-major format:
+ * 
+ * [b11 b12 b13 a11 a12 a13; b21 b22 b23 a21 a22 a23; ...]
+ * 
+ * where b are the second order filter numerator coefficients, and 
+ * a are the denominator coefficients. It is assumed the coefficients are 
+ * normalized such that an1[0] = 1. Each row represents one second order
+ * section of the filter, cascaded together. 
+ * 
+ * The sosGain vector is expected in the following format:
+ * 
+ * [g1, g2, ..., gOverall]
+ * 
+ * where g1 is the gain of section 1, g2 is the gain of section 2, and so forth.
+ * Optionally, an additional overall filter gain, gOverall, may be specified, and
+ * defaults to 1 if not supplied.
+ * 
+ * In order to avoid dynamic memory allocation, the maximum number of
+ * sections of the filter is statically allocated via CSOSFILTER_MAXSECTIONS. 
+ * 
  * Copyright (C) Jonathan Currie 2023 (www.controlengineering.co.nz)
  */
 
