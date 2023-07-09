@@ -1,4 +1,4 @@
-%% P, PI, PD and PID Examples
+%% Anti WindUp Examples
 % J.Currie Apr 2023
 clc
 clear
@@ -18,64 +18,6 @@ step(Gs)
 Ts = 0.1;
 tFinal = 60;
 
-%% P-Only
-Kp = 0.5;
-Ki = 0;
-Kd = 0;
-
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_p, y_p] = simCPID(Gs, pidParams, t, r, 0, 'P Only Control');
-
-%% PI
-Kp = 0.5;
-Ki = 0.1;
-Kd = 0;
-
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_pi, y_pi] = simCPID(Gs, pidParams, t, r, 0, 'PI Control');
-
-%% PD
-Kp = 0.5;
-Ki = 0;
-Kd = 0.2;
-
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_pd, y_pd] = simCPID(Gs, pidParams, t, r, 0, 'PD Control');
-
-%% PID
-Kp = 0.5;
-Ki = 0.2;
-Kd = 0.2;
-
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_pid, y_pid] = simCPID(Gs, pidParams, t, r, 0, 'PID Control');
-
-%% Comparison Plot
-clf
-subplot(211)
-plot(t,y_p,t,y_pi,t,y_pd,t,y_pid);
-hold on;
-stairs(t,r,'k:');
-hold off; grid on;
-ylabel('Plant Output [y]');
-title('Control Type Comparison');
-legend('P','PI','PD','PID')
-
-subplot(212);
-stairs(t,u_p);
-hold on;
-stairs(t,u_pi);
-stairs(t,u_pd);
-stairs(t,u_pid);
-hold off;
-grid on;
-ylabel('Control Input [u]');
-xlabel('Time [s]');
-
 %% PID with Anti Windup + U Saturation
 Kp = 0.5;
 Ki = 0.2;
@@ -86,7 +28,7 @@ uMax = 1;
 
 pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax);
 [t,r] = makeCPIDSimVec(Ts,tFinal);
-simCPID(Gs, pidParams, t, r*5, 0, 'PID Control w U Saturation (NO Anti Windup)');
+simCPID(Gs, pidParams, t, r*5, 0, 'PID Control w Anti WindUp & U Saturation');
 
 %% PID with Process Variable Only Derivative
 Kp = 0.5;
@@ -98,15 +40,15 @@ uMax = +Inf;
 b = 1; % Kp setpoint weight
 c = 0; % Kd setpoint weight
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_pv, y_pv] = simCPID(Gs, pidParams, t, r, 0, 'PID Control w PV Only Derivative');
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_pv, y_pv] = simPID(Gs, pidParams, t, r, 0, 'PID Control w PV Only Derivative');
 
 %% Comparison Plot
 clf
 c = 0.5;
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[u_pv05, y_pv05] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[u_pv05, y_pv05] = simPID(Gs, pidParams, t, r);
 
 subplot(211)
 plot(t,y_pid,t,y_pv05,t,y_pv);
@@ -133,9 +75,9 @@ Ki = 0.2;
 Kd = 0.2;
 noiseVar = 0.01;
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-simCPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Noisy Measurements');
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Noisy Measurements');
 
 %% PID with Noisy Measurements + Derivative Filter
 Kp = 0.5;
@@ -144,9 +86,9 @@ Kd = 0.2;
 Tf = 0.5;
 noiseVar = 0.01;
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-simCPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter and Noisy Measurements');
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter and Noisy Measurements');
 
 %% PID with Noisy Measurements + PV Only Derivative + Derivative Filter
 Kp = 0.5;
@@ -159,9 +101,9 @@ uMax = +Inf;
 b = 1; % Kp setpoint weight
 c = 0; % Kd setpoint weight
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-simCPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter, PV Only Derivative and Noisy Measurements');
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter, PV Only Derivative and Noisy Measurements');
 
 %% PID with Noisy Measurements + PV Only Derivative + Derivative Filter RETUNED
 Kp = 0.3;
@@ -174,9 +116,9 @@ uMax = +Inf;
 b = 1; % Kp setpoint weight
 c = 0.2; % Kd setpoint weight
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-simCPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter, PV Only Derivative and Noisy Measurements RETUNED');
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+simPID(Gs, pidParams, t, r, noiseVar, 'PID Control with Derivative Filter, PV Only Derivative and Noisy Measurements RETUNED');
 
 %% PID Setpoint Weighting
 clf
@@ -188,24 +130,24 @@ uMin = -Inf;
 uMax = +Inf;
 b = 1; % Kp setpoint weight
 c = 1; % Kd setpoint weight
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_1_1, y_1_1] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_1_1, y_1_1] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, c);
-[u_05_1, y_05_1] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, c);
+[u_05_1, y_05_1] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, c);
-[u_0_1, y_0_1] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, c);
+[u_0_1, y_0_1] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 1.0, 0.5);
-[u_1_05, y_1_05] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 1.0, 0.5);
+[u_1_05, y_1_05] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, 0.5);
-[u_05_05, y_05_05] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.5, 0.5);
+[u_05_05, y_05_05] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, 0.5);
-[u_0_05, y_0_05] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, 0.0, 0.5);
+[u_0_05, y_0_05] = simPID(Gs, pidParams, t, r);
 
 subplot(211)
 plot(t,y_1_1,t,y_1_05,t,y_05_1,t,y_05_05,t,y_0_1,t,y_0_05);
@@ -241,12 +183,12 @@ b = 1; % Kp setpoint weight
 c = 0; % Kd setpoint weight
 rRampMax = 0.015;
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c, rRampMax);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u,y,rOut] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u,y,rOut] = simPID(Gs, pidParams, t, r);
 
-pidParams = makeCPIDParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
-[uNoRamp,yNoRamp] = simCPID(Gs, pidParams, t, r);
+pidParams = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c);
+[uNoRamp,yNoRamp] = simPID(Gs, pidParams, t, r);
 
 % Manual Plot
 subplot(211)
@@ -325,13 +267,13 @@ uMax = +Inf;
 rRampMax = +Inf;
 noiseVar = 0.0;
 
-pidParams = makeCPIDParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_fo,y_fo,rOut] = simCPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling FOPDT Model');
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_fo,y_fo,rOut] = simPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling FOPDT Model');
 
 %% Sim on real plant (magic of simulation)
 clc
-[u,y,rOut] = simCPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
+[u,y,rOut] = simPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
 
 %% PID Tuning: SOPDT True Plant Model
 clc
@@ -392,13 +334,13 @@ uMax = +Inf;
 rRampMax = +Inf;
 noiseVar = 0.0;
 
-pidParams = makeCPIDParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_fo,y_fo] = simCPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling SOPDT Model');
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_fo,y_fo] = simPID(Gs_fit, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling SOPDT Model');
 
 %% Sim on real plant (magic of simulation)
 clc
-[u,y,rOut] = simCPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
+[u,y,rOut] = simPID(Gs_true, pidParams, t, r, noiseVar, 'PIDTuner Tuned 2-DOF PID controlling True Model');
 
 
 %% Stable System
@@ -558,9 +500,9 @@ uMin = -Inf;
 uMax = +Inf;
 rRampMax = +Inf;
 
-pidParams = makeCPIDParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_o,y_o] = simCPID(Gs, pidParams, t, r, 0, 'PIDTuner Tuned Controller');
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_o,y_o] = simPID(Gs, pidParams, t, r, 0, 'PIDTuner Tuned Controller');
 
 %% Determine Stability Margins
 clc
@@ -634,9 +576,9 @@ Gs_nom = tf(K_nom*wn_nom^2, [1 2*zeta_nom*wn_nom wn_nom^2]);
 Gz_nom = c2d(Gs_nom, Ts);
 Wc = 0.025*2*pi; % Crossover frequency
 mlPID = pidtune(Gz_nom,'PIDF2',Wc);
-pidParams = makeCPIDParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, -Inf, Inf, mlPID.b, mlPID.c);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_nom,y_nom] = simCPID(Gs_nom, pidParams, t, r);
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, -Inf, Inf, mlPID.b, mlPID.c);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_nom,y_nom] = simPID(Gs_nom, pidParams, t, r);
 
 % Monte Carlo Sim with LHS paramset
 params = lhs({K,wn,zeta},100);
@@ -648,7 +590,7 @@ for i = 1:length(params)
     wn = params{i}(2);
     zeta = params{i}(3);
     Gs_mc(:,:,i) = tf(K*wn^2, [1 2*zeta*wn wn^2]);
-    [u,y] = simCPID(Gs_mc(:,:,i), pidParams, t, r);
+    [u,y] = simPID(Gs_mc(:,:,i), pidParams, t, r);
 
     % Add to plot
     subplot(211)
@@ -691,7 +633,7 @@ margin(Cfr * Gz_mc(:,:,5))
 params{5}
 
 %% Time Domain of Unstable System
-simCPID(Gs_mc(:,:,5), pidParams, t, r,0,'Unstable System Zoom');
+simPID(Gs_mc(:,:,5), pidParams, t, r,0,'Unstable System Zoom');
 
 %% Extra for Experts: Add Notch across resonance
 clc
@@ -720,9 +662,9 @@ uMin = -Inf;
 uMax = +Inf;
 rRampMax = +Inf;
 
-pidParams = makeCPIDParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
-[t,r] = makeCPIDSimVec(Ts,tFinal);
-[u_notch,y_notch] = simCPID(GzFilt * Gz, pidParams, t, r);
+pidParams = makeControllerParams(mlPID.Kp, mlPID.Ki, mlPID.Kd, mlPID.Ts, mlPID.Tf, uMin, uMax, mlPID.b, mlPID.c, rRampMax);
+[t,r] = makeTimeSetpoint(Ts,tFinal);
+[u_notch,y_notch] = simPID(GzFilt * Gz, pidParams, t, r);
 
 % Manual Plot
 subplot(211)
