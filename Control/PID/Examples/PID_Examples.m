@@ -1,4 +1,4 @@
-%% PID Examples
+%% P, PI, PD and PID Examples
 % J.Currie Apr 2023
 clc
 clear
@@ -758,107 +758,12 @@ h = nicholsplot(CG_OL);
 setoptions(h,'FreqUnits','Hz'); grid on;
 
 %% Local Functions
-function [u, y, rOut] = simPID(Gs, params, t, r, noiseVar, plotTitle)
-
-if (nargin < 5 || isempty(noiseVar)), noiseVar = 0; end
-if (nargin < 6), plotTitle = []; end
-
-% Same seed each run
-rng('default');
-
-% Discretize Plant
-if (Gs.Ts == 0)
-    Gz = c2d(Gs, params.Ts);
-else
-    Gz = Gs;
-end
-Gzss = ss(Gz);
-% Ensure delays within states
-if (Gzss.InputDelay ~= 0 || Gzss.OutputDelay ~= 0)
-    Gzss = delay2z(Gzss);
-end
-
-% Init Controller
-if (mxCPID('init',params) ~= 0)
-    error('Error initializing PID controller!');
-end
-
-% Create outputs
-n = length(t);
-u = zeros(size(t));
-y = zeros(size(t));
-ytrue = zeros(size(t));
-rOut = zeros(size(t));
-nx = size(Gzss.B,1);
-x0 = zeros(nx,1);
-
-% Simulate step by step
-for i = 1:n-1
-    [u(i),~,rOut(i)] = mxCPID('update', r(i), y(i));
-    [Y,~,X] = lsim(Gzss,[u(i) u(i)],[t(i) t(i+1)],x0);
-    y(i+1) = Y(end) + sqrt(noiseVar) * randn(1);
-    ytrue(i+1) = Y(end);
-    x0 = X(end,:);
-end
-% Copy final u
-u(end) = u(end-1);
-
-if (~isempty(plotTitle))
-    % Plot
-    subplot(211)
-    plot(t,y);
-    hold on;
-    if (noiseVar ~= 0)
-        plot(t,ytrue);        
-    end
-    stairs(t,r,'k:');
-    hold off; grid on;
-    ylabel('Plant Output [y]');
-    title(plotTitle);
-    if (noiseVar ~= 0)
-        legend('y Measured','y True');
-    end
-    
-    subplot(212);
-    stairs(t,u);
-    grid on;
-    ylabel('Control Input [u]');
-    xlabel('Time [s]');
-end
-end
 
 
-function params = makeControllerParams(Kp, Ki, Kd, Ts, Tf, uMin, uMax, b, c, rRampMax)
 
-params = [];
-params.Kp = Kp;
-params.Ki = Ki;
-params.Kd = Kd;
-params.Ts = Ts;
-if (nargin > 4), params.Tf = Tf; else params.Tf = 0; end
-if (nargin > 5), params.uMin = uMin; else params.uMin = -Inf; end
-if (nargin > 6), params.uMax = uMax; else params.uMax = +Inf; end
-if (nargin > 7), params.b = b; else params.b = 1; end
-if (nargin > 8), params.c = c; else params.c = 1; end
-if (nargin > 9), params.rRampMax = rRampMax; else params.rRampMax = Inf; end
 
-end
 
-function [t, r] = makeTimeSetpoint(Ts, tFinal)
 
-t = 0:Ts:tFinal;
-r = ones(size(t));
-
-% Delay initial step
-tFinal8 = tFinal/8;
-[~,idx] = min(abs(t - tFinal8));
-r(1:idx) = 0;
-
-% Add final step
-[~,idx] = min(abs(t - tFinal8*5));
-r(idx:end) = 0;
-
-end
 
 function [Gs_fit,K,tau,theta,yfit] = fitFOPDT(t, u, y, K0, tau0, theta0, plotTitle)
 
