@@ -252,7 +252,7 @@ clf
 % Anti-Aliasing Analog (continuous) LPF via 1st Order Resistor-Capacitor
 % https://www.allaboutcircuits.com/technical-articles/understanding-transfer-functions-for-low-pass-filters/
 % Note: Fc [rad/s] = 1/RC
-Fc = 10; % 3dB corner frequency [Hz]
+Fc = 30; % 3dB corner frequency [Hz]
 R = 10e3; % Example, [ohms]
 C = 1/(2*pi*Fc*R); % Capacitance [F]
 Gs = tf(1,[R*C 1]);
