@@ -1,4 +1,4 @@
-%% PID Examples
+%% P, PI, PD and PID Examples
 % J.Currie Apr 2023
 clc
 clear
