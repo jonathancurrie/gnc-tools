@@ -2,7 +2,7 @@ name: Deploy documentation to GitHub Pages
 
 on:
   push:
-    branches: [master, main, feature/testdocs]
+    branches: [master, main]
     paths:
       - '.github/workflows/deploy-pages.yml'
       - 'Documentation/**'
