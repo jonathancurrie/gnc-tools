@@ -1,0 +1,175 @@
+{
+  "format": 1,
+  "source": "GNC",
+  "site_slug": "gnc",
+  "source_timezone": "UTC",
+  "pages": [
+    {
+      "source": "Control.Filter",
+      "title": "Digital Filtering",
+      "file": "control/filtering/index.md",
+      "route": "/control/filtering/"
+    },
+    {
+      "source": "Control.FilterAliasing",
+      "title": "Digital Filtering: Aliasing",
+      "file": "control/filtering/aliasing.md",
+      "route": "/control/filtering/aliasing/"
+    },
+    {
+      "source": "Control.FilterDesign",
+      "title": "Filter Design",
+      "file": "control/filtering/filter-design.md",
+      "route": "/control/filtering/filter-design/"
+    },
+    {
+      "source": "Control.FilterSoftware",
+      "title": "Digital Filtering: Software",
+      "file": "control/filtering/software.md",
+      "route": "/control/filtering/software/"
+    },
+    {
+      "source": "Control.PID",
+      "title": "Proportional-Integral-Derivative (PID) Control",
+      "file": "control/pid/index.md",
+      "route": "/control/pid/"
+    },
+    {
+      "source": "Control.PIDAntiWindUp",
+      "title": "PID Control: Anti WindUp",
+      "file": "control/pid/anti-windup.md",
+      "route": "/control/pid/anti-windup/"
+    },
+    {
+      "source": "Control.PIDDerivFilter",
+      "title": "PID Control: Derivative Filter",
+      "file": "control/pid/derivative-filter.md",
+      "route": "/control/pid/derivative-filter/"
+    },
+    {
+      "source": "Control.PIDPID",
+      "title": "PID Control: P, PI, PD and PID",
+      "file": "control/pid/controller-types.md",
+      "route": "/control/pid/controller-types/"
+    },
+    {
+      "source": "Control.PIDPVDeriv",
+      "title": "PID Control: Process Variable Derivative",
+      "file": "control/pid/process-variable-derivative.md",
+      "route": "/control/pid/process-variable-derivative/"
+    },
+    {
+      "source": "Control.PIDSetpRamp",
+      "title": "PID Control: Setpoint Ramping",
+      "file": "control/pid/setpoint-ramping.md",
+      "route": "/control/pid/setpoint-ramping/"
+    },
+    {
+      "source": "Control.PIDSetpWeight",
+      "title": "PID Control: Setpoint Weighting",
+      "file": "control/pid/setpoint-weighting.md",
+      "route": "/control/pid/setpoint-weighting/"
+    },
+    {
+      "source": "Control.PIDStability",
+      "title": "PID Control: Stability Guide",
+      "file": "control/pid/stability.md",
+      "route": "/control/pid/stability/"
+    },
+    {
+      "source": "Control.PIDTuning",
+      "title": "PID Control: Tuning Guide",
+      "file": "control/pid/tuning.md",
+      "route": "/control/pid/tuning/"
+    },
+    {
+      "source": "Main.Bibliography",
+      "title": "GNC Wiki Bibliography",
+      "file": "resources/bibliography.md",
+      "route": "/resources/bibliography/"
+    },
+    {
+      "source": "Main.HomePage",
+      "title": "Guidance, Navigation, and Control Tools",
+      "file": "index.md",
+      "route": "/"
+    },
+    {
+      "source": "Main.Software",
+      "title": "Software",
+      "file": "resources/software.md",
+      "route": "/resources/software/"
+    },
+    {
+      "source": "Main.SpaceNewsSites",
+      "title": "Space News Sites",
+      "file": "resources/space-news-sites.md",
+      "route": "/resources/space-news-sites/"
+    },
+    {
+      "source": "Overview.Nomenclature",
+      "title": "Nomenclature, Units and Reference Frames",
+      "file": "overview/nomenclature.md",
+      "route": "/overview/nomenclature/"
+    },
+    {
+      "source": "Overview.WhatDo",
+      "title": "What Does a GNC Engineer Do?",
+      "file": "overview/what-gnc-engineers-do.md",
+      "route": "/overview/what-gnc-engineers-do/"
+    },
+    {
+      "source": "Overview.WhatIs",
+      "title": "What Is Guidance, Navigation, and Control?",
+      "file": "overview/what-is-gnc.md",
+      "route": "/overview/what-is-gnc/"
+    }
+  ],
+  "counts": {
+    "pages": 20,
+    "groups": {
+      "Control": 13,
+      "Main": 4,
+      "Overview": 3
+    },
+    "source_blocks": 64,
+    "inline_code_spans": 46,
+    "links": 97,
+    "image_references": 63,
+    "copied_images": 65,
+    "table_blocks": 4
+  },
+  "warnings": {
+    "unresolved_links": [],
+    "missing_images": [],
+    "unused_images": [
+      "pid_fopdt.png",
+      "pid_pidsetrampretune.png"
+    ],
+    "residual_markup": []
+  },
+  "exceptions": {
+    "unpublished_link_targets": [
+      {
+        "page": "Control.Filter",
+        "target": "Control/Filter FFT",
+        "label": "FFT"
+      },
+      {
+        "page": "Control.Filter",
+        "target": "Control/Filter FIRIIR",
+        "label": "FIR vs IIR"
+      },
+      {
+        "page": "Control.Filter",
+        "target": "Control/Filter SOS",
+        "label": "Second Order Sections"
+      },
+      {
+        "page": "Control.Filter",
+        "target": "Control/Filter Practical",
+        "label": "Practical Considerations"
+      }
+    ]
+  }
+}
