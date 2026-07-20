@@ -13,7 +13,7 @@ Once you have cloned or downloaded GNCTools to your PC, simply open MATLAB and n
 The best way to start using GNCTools is to have a look at the [Wiki](https://www.controlengineering.co.nz/Wikis/GNC/pmwiki.php). There are lots of problem and code examples (which all work) as well as helpful definitions. 
 
 #### License
-GNCTools is released under the 3-clause BSD license, as detailed below.
+GNCTools is released under the 3-clause BSD license, as detailed below. 
 
 Copyright (C) 2023, Jonathan Currie
 All rights reserved.
