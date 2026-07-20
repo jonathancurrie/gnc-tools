@@ -1,0 +1,36 @@
+{
+  "groups": {
+    "Control": "control",
+    "Overview": "overview"
+  },
+  "pages": {
+    "Main.HomePage": "index.md",
+    "Overview.WhatIs": "overview/what-is-gnc.md",
+    "Overview.WhatDo": "overview/what-gnc-engineers-do.md",
+    "Overview.Nomenclature": "overview/nomenclature.md",
+    "Control.PID": "control/pid/index.md",
+    "Control.PIDPID": "control/pid/controller-types.md",
+    "Control.PIDAntiWindUp": "control/pid/anti-windup.md",
+    "Control.PIDPVDeriv": "control/pid/process-variable-derivative.md",
+    "Control.PIDDerivFilter": "control/pid/derivative-filter.md",
+    "Control.PIDSetpWeight": "control/pid/setpoint-weighting.md",
+    "Control.PIDSetpRamp": "control/pid/setpoint-ramping.md",
+    "Control.PIDTuning": "control/pid/tuning.md",
+    "Control.PIDStability": "control/pid/stability.md",
+    "Control.Filter": "control/filtering/index.md",
+    "Control.FilterAliasing": "control/filtering/aliasing.md",
+    "Control.FilterDesign": "control/filtering/filter-design.md",
+    "Control.FilterSoftware": "control/filtering/software.md",
+    "Main.Software": "resources/software.md",
+    "Main.SpaceNewsSites": "resources/space-news-sites.md",
+    "Main.Bibliography": "resources/bibliography.md"
+  },
+  "allow_unresolved_links": {
+    "Control.Filter": [
+      "Control/Filter FFT",
+      "Control/Filter FIRIIR",
+      "Control/Filter SOS",
+      "Control/Filter Practical"
+    ]
+  }
+}
