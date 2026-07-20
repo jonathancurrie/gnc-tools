@@ -105,7 +105,7 @@ window = [];
 
 % Plot
 plot(f2,10*log10(abs(pxx2)),f1,10*log10(abs(pxx1)),f,10*log10(abs(pxx)))
-xlim([0 Fs2/2]); ylim([-80 0]); grid on;
+xlim([0 Fs/2]); ylim([-80 0]); grid on;
 xlabel('Frequency [Hz]')
 ylabel('Power [dB]')
 legend(sprintf('Freq Resolution %.2f Hz',mean(diff(f2))),sprintf('Freq Resolution %.2f Hz',mean(diff(f1))),sprintf('Freq Resolution %.2f Hz',mean(diff(f))))
@@ -129,7 +129,7 @@ window = [];
 
 % Plot
 plot(f2,10*log10(abs(pxx2)),'x',f1,10*log10(abs(pxx1)),'o',f,10*log10(abs(pxx)))
-xlim([0 Fs2/2]); ylim([-80 0]); grid on;
+xlim([0 Fs/2]); ylim([-80 0]); grid on;
 xlabel('Frequency [Hz]')
 ylabel('Power [dB]')
 legend(sprintf('Freq Resolution %.2f Hz',mean(diff(f2))),sprintf('Freq Resolution %.2f Hz',mean(diff(f1))),sprintf('Freq Resolution %.2f Hz',mean(diff(f))))
@@ -172,7 +172,7 @@ window = [];
 
 % Plot
 plot(f2,10*log10(abs(pxx2)),f1,10*log10(abs(pxx1)),f,10*log10(abs(pxx)))
-xlim([0 Fs2/2]); ylim([-80 0]); grid on;
+xlim([0 Fs/2]); ylim([-80 0]); grid on;
 xlabel('Frequency [Hz]')
 ylabel('Power Spectral Density [dB/Hz]')
 legend(sprintf('Freq Resolution %.2f Hz',mean(diff(f2))),sprintf('Freq Resolution %.2f Hz',mean(diff(f1))),sprintf('Freq Resolution %.2f Hz',mean(diff(f))))
@@ -196,7 +196,7 @@ window = [];
 
 % Plot
 plot(f2,10*log10(abs(pxx2)),'x',f1,10*log10(abs(pxx1)),'o',f,10*log10(abs(pxx)))
-xlim([0 Fs2/2]); ylim([-80 0]); grid on;
+xlim([0 Fs/2]); ylim([-80 0]); grid on;
 xlabel('Frequency [Hz]')
 ylabel('Power Spectral Density [dB/Hz]')
 legend(sprintf('Freq Resolution %.2f Hz',mean(diff(f2))),sprintf('Freq Resolution %.2f Hz',mean(diff(f1))),sprintf('Freq Resolution %.2f Hz',mean(diff(f))))
@@ -286,12 +286,105 @@ window = [];
 nfft = length(x);
 [Pxx,f] = periodogram(x,window,nfft,Fs,'power');
 
-% 7*len(x)
-nfft1 = 7*length(x);
+% Fs*10
+nfft1 = Fs*10;
 [Pxx1,f1] = periodogram(x,window,nfft1,Fs,'power');
 
-plot(f,10*log10(abs(Pxx)),f1,10*log10(abs(Pxx1)))
+plot(f,10*log10(abs(Pxx)),'x-',f1,10*log10(abs(Pxx1)))
 grid on; xlabel('Frequency [Hz]'); ylabel('Power [dB]')
-legend(sprintf('nfft = length(x) = %d',nfft),sprintf('nfft = length(x) = %d',nfft1))
+legend(sprintf('nfft = length(x) = %d',nfft),sprintf('nfft = %d',nfft1))
+title('Periodogram Power Spectrum Estimate vs nfft')
 
-%% Padding: Problem
+%% Padding: Less Benefit
+clc
+clf
+
+% Create a time series signal with 2x cosine close to each other
+x = cos(1.75*2*pi*t) + cos(2.25*2*pi*t);
+
+% len(x)
+window = [];
+nfft = length(x);
+[Pxx,f] = periodogram(x,window,nfft,Fs,'power');
+
+% 32*len(x)
+nfft1 = 32*length(x);
+[Pxx1,f1] = periodogram(x,window,nfft1,Fs,'power');
+
+plot(f,10*log10(abs(Pxx)),'x-',f1,10*log10(abs(Pxx1)))
+grid on; xlabel('Frequency [Hz]'); ylabel('Power [dB]')
+legend(sprintf('nfft = length(x) = %d',nfft),sprintf('nfft = %d',nfft1))
+title('Periodogram Power Spectrum Estimate vs nfft')
+
+%% Padding: Correct Length
+clc
+clf
+
+Fs = 50;       % Sampling Frequency [Hz]
+T = 1/Fs;      % Sampling Interval [s]
+L = 3.8*Fs;    % Number of elements in input signal
+t = (0:L-1)*T; % Time vector [s]
+
+% Create a time series signal with 2x cosine close to each other
+x = cos(1.75*2*pi*t) + cos(2.25*2*pi*t);
+
+% len(x)
+window = [];
+nfft = length(x);
+[Pxx,f] = periodogram(x,window,nfft,Fs,'power');
+
+% 0.05Hz resolution
+nfft1 = Fs/0.05;
+[Pxx1,f1] = periodogram(x,window,nfft1,Fs,'power');
+
+plot(f,10*log10(abs(Pxx)),'x-',f1,10*log10(abs(Pxx1)))
+grid on; xlabel('Frequency [Hz]'); ylabel('Power [dB]')
+legend(sprintf('nfft = length(x) = %d',nfft),sprintf('nfft = %d',nfft1))
+title('Periodogram Power Spectrum Estimate vs nfft')
+
+%% Windowing: Rectangular 
+clc
+clf
+
+Fs = 1e2;      % Sampling Frequency [Hz]
+T = 1/Fs;      % Sampling Interval [s]
+L = 0.5*Fs;  % Number of elements in input signal
+t = (0:L-1)*T; % Time vector [s]
+
+% Create a time series signal with 2x cosine
+freq1 = 2.35;
+freq2 = 20.65;
+x = cos(freq1*2*pi*t) + cos(freq2*2*pi*t);
+
+% len(x) Rectangular
+window = [];
+nfft = length(x);
+[Pxx,f] = periodogram(x,window,nfft,Fs,'power');
+
+% 0.05Hz Rectangular
+nfft1 = Fs/0.5;
+window1 = rectwin(L);
+[Pxx1,f1] = periodogram(x,window1,nfft1,Fs,'power');
+
+% 0.05Hz Hann
+nfft2 = Fs/0.5;
+window2 = hann(L);
+[Pxx2,f2] = periodogram(x,window2,nfft2,Fs,'power');
+
+% 0.05Hz Blackman
+nfft3 = Fs/0.5;
+window3 = blackman(L);
+[Pxx3,f3] = periodogram(x,window3,nfft3,Fs,'power');
+
+plot(f,10*log10(abs(Pxx)),'x-',f1,10*log10(abs(Pxx1)),f2,10*log10(abs(Pxx2)),f3,10*log10(abs(Pxx3)))
+grid on; xlabel('Frequency [Hz]'); ylabel('Power [dB]')
+legend(sprintf('nfft = length(x) = %d, Rectangular',nfft),...
+    sprintf('nfft = %d, Rectangular',nfft1),...
+    sprintf('nfft = %d, Hann',nfft2),...
+    sprintf('nfft = %d, Blackman-Harris',nfft3),'location','best')
+xlim([0 40]); ylim([-100 0]); vline([freq1,freq2],'r--')
+title('Periodogram Power Spectrum Estimate vs nfft & Window')
+
+
+
+
