@@ -21,9 +21,9 @@ Some links to software which I recommend for working in GNC!
 
 ## Commercial Software
 
-- **[MATLAB](https://ww.mathworks.com/products/matlab.html)**
+- **[MATLAB](https://www.mathworks.com/products/matlab.html)**
 
-  MATLAB, with the [Control Systems Toolbox](https://ww.mathworks.com/products/control.html) and [Signal Processing Toolbox](https://www.mathworks.com/products/signal.html) should be mandatory for every GNC Engineer. It's possible I've spent more hours in MATLAB than asleep in the last decade.
+  MATLAB, with the [Control Systems Toolbox](https://www.mathworks.com/products/control.html) and [Signal Processing Toolbox](https://www.mathworks.com/products/signal.html) should be mandatory for every GNC Engineer. It's possible I've spent more hours in MATLAB than asleep in the last decade.
 
 - **[GitKraken](https://www.gitkraken.com/)**
 

@@ -226,7 +226,7 @@ phase_deg =
    -90
 ```
 
-Rather than write our own function to do this, we can use MATLAB's [bode](https://au.mathworks.com/help/ident/ref/dynamicsystem.bode.html) or [bodeplot](https://au.mathworks.com/help/ident/ref/dynamicsystem.bodeplot.html):
+Rather than write our own function to do this, we can use MATLAB's [bode](https://au.mathworks.com/help/ident/ref/dynamicsystem.bode.html) or [bodeplot](https://au.mathworks.com/help/control/ref/bodeplot.html):
 
 ```matlab
 h = bodeplot(Gs);
