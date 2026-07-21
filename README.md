@@ -1,5 +1,5 @@
 # GNC Tools
-If you are interested in Guidance, Navigation, Control, Signal Processing, Modelling or Software Development for Aerospace Applications, use MATLAB and know your way around C/C++, then GNC Tools provides a suite of example software and models for free! See the [GNC Tools Wiki](https://jonathancurrie.github.io/gnc-tools/) for details on everything GNC!
+If you are interested in Guidance, Navigation, Control, Signal Processing, Modelling or Software Development for Aerospace Applications, use MATLAB and know your way around C/C++, then GNC Tools provides a suite of example software and models for free! See the [GNC Tools Documentation](https://jonathancurrie.github.io/gnc-tools/) for details on everything GNC!
 
 #### Downloading GNC Tools
 The best way to get GNCTools is to clone the master branch from GitHub (this page!) using git. I like [GitKraken](https://www.gitkraken.com/) which makes it easy to use git without the command line. Once you have git/GitKraken/some other git client, simply click **Clone or download** (above, green button) and copy the address of this repository, and clone it to your computer. This way each time I push updates to the master branch, you can simply pull them down without having to redownload the entire package again! 
