@@ -76,7 +76,7 @@ K0 = 6;
 theta0 = 0.5;
 tau0 = 2.75 - theta0;
 
-% Note requires OPTI Toolbox: https://www.controlengineering.co.nz/Wikis/OPTI/
+% Note requires OPTI Toolbox: https://github.com/jonathancurrie/OPTI
 Gs_fit = fitFOPDT(t,ustep,ymeas,K0,tau0,theta0,'FOPDT Fit')
 ```
 
@@ -189,7 +189,7 @@ wn0 = 1;
 zeta0 = 0.5;
 theta0 = 0.3;
 
-% Note requires OPTI Toolbox: https://www.controlengineering.co.nz/Wikis/OPTI/
+% Note requires OPTI Toolbox: https://github.com/jonathancurrie/OPTI
 [Gs_fit,K,wn,zeta,theta] = fitSOPDT(t,ustep,ymeas,K0,wn0,zeta0,theta0,'SOPDT Fit')
 ```
 

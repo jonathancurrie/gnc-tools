@@ -14,7 +14,7 @@ function GNCTools_Install(savePath,runTests,openBrowser)
 % You MUST be in the current directory of this file!
 %
 %   Copyright (C) 2023 Jonathan Currie (Control Engineering)
-%   https://controlengineering.co.nz/Wikis/GNC/
+%   https://jonathancurrie.github.io/gnc-tools/
 
 % Handle missing input args
 if (nargin < 3), openBrowser = []; end
