@@ -61,6 +61,7 @@ rInd{:,:,i} = strfind(genp,'Tests'); i = i + 1;
 rInd{:,:,i} = strfind(genp,['Utilities' filesep 'Install']); i = i + 1;
 rInd{:,:,i} = strfind(genp,'slprj'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'.vscode'); i = i + 1;
+rInd{:,:,i} = strfind(genp,'.github'); i = i + 1;
 rInd{:,:,i} = strfind(genp,'.git'); 
 
 ind = NaN(length(rInd{1}),1);
@@ -112,7 +113,7 @@ end
 
 %Launch Examples page
 if (isempty(openBrowser) || (openBrowser == true))
-    web('https://www.controlengineering.co.nz/Wikis/GNC/pmwiki.php/Main/HomePage','-browser');
+    web('https://jonathancurrie.github.io/gnc-tools/','-browser');
 end
 
 %Finished
